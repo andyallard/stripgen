@@ -366,7 +366,7 @@ def generate_phraseology(data):
     phraseology = f"RUNWAY {data['determinedrunway']}"
     wind = str(data['weather'].print_wind()) if data['weather'].wind_speed >= 3 else 'CALM'
     phraseology += f'\nWIND {wind}'
-    phraseology += f'\nALTIMETER {data['weather'].print_altimeter()}'
+    phraseology += f"\nALTIMETER {data['weather'].print_altimeter()}"
     phraseology += '\n\nTRAFFIC'
 
     if strip['type'] == 'A':
