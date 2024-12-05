@@ -2,29 +2,18 @@ import random
 
 class Weather:
     def __init__(self, wind_speed=None, direction=None, gust=None, altimeter=None) -> None:
+        self.generate_wind_speed(wind_speed)
+        self.generate_direction(direction)
+        self.generate_gust(gust)
+        self.generate_altimeter(altimeter)
+
+        self.check_calm_wind()
+
+    def generate_wind_speed(self, wind_speed=None):
         if wind_speed is not None:
             self.wind_speed = wind_speed
-        else:
-            self.generate_wind_speed()
-
-        if direction is not None:
-            self.direction = direction
-        else:
-            self.generate_direction()
-
-        if gust is not None:
-            self.gust = gust
-        else:
-            self.generate_gust()
-
-        if altimeter is not None:
-            self.altimeter = altimeter
-        else:
-            self.generate_altimeter()
-
-        self.set_calm_wind()
-
-    def generate_wind_speed(self):
+            return
+        
         # Wind is assumed to be most commonly light (5), with lower probability
         # of being anything else, decaying on either side of 5 knots
 
@@ -46,12 +35,20 @@ class Weather:
         # Generate a random number with the specified weights
         self.wind_speed = random.choices(values, weights=weights, k=1)[0]
 
-    def generate_direction(self):
+    def generate_direction(self, direction=None):
+        if direction is not None:
+            self.direction = direction
+            return
+        
         self.direction = random.randint(0, 36) * 10
         if self.wind_speed > 0 and self.direction == 0:
             self.direction = 360
 
-    def generate_gust(self):
+    def generate_gust(self, gust=None):
+        if gust is not None:
+            self.gust = gust
+            return
+        
         # the stronger the wind, the more likely it is to have gusts
         if self.wind_speed < 10:
             self.gust = random.choice([0, 0, random.randint(5, 20)])
@@ -60,19 +57,20 @@ class Weather:
         else:
             self.gust = random.choice([0, random.randint(5, 20), random.randint(5, 20)])
 
-        # print(' wind: ', wind, 'gust: ', gust)  # for debugging
-
-        # if gust > 0 and (wind + gust) < 15:
         if self.gust > 0 and (self.wind_speed + self.gust) < 15:
             self.gust = 15 - self.wind_speed
 
         if self.gust > 0:
             self.gust += self.wind_speed  # gust is calculated as an amount over the wind speed, then finally it's converted to actual gust speed
 
-    def generate_altimeter(self):
+    def generate_altimeter(self, altimeter=None):
+        if altimeter is not None:
+            self.altimeter = altimeter
+            return
+        
         self.altimeter = random.randint(2885, 3115)
 
-    def set_calm_wind(self):
+    def check_calm_wind(self):
         if self.wind_speed < 3:
             self.wind_speed = 0
             self.gust = 0

@@ -248,7 +248,7 @@ def generate_departure_strip(time, locations):
     strip = generate_strip()
     strip['pointofdeparture'] = march
     strip['destination'] = random.choice(locations)
-    print(strip['destination'])
+    # print(strip['destination'])
     strip['type'] = 'D'
     strip['arrdeptime'], strip['timesincedeparture'] = generate_departure_time(time)
 
@@ -303,7 +303,7 @@ def generate_phraseology(data):
     wind = str(data['weather'].print_wind()) if data['weather'].wind_speed >= 3 else 'CALM'
     phraseology += f'\nWIND {wind}'
     phraseology += f"\nALTIMETER {data['weather'].print_altimeter()}"
-    print(data['weather'].altimeter)
+    
     if (2899 >= data['weather'].altimeter) or (data['weather'].altimeter >= 3100):
         phraseology +=f" I SAY AGAIN ALTIMETER {data['weather'].print_altimeter()}"
     phraseology += '\n\nTRAFFIC'
