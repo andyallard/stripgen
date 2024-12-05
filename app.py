@@ -89,6 +89,7 @@ def overflight():
     data = dict()
     class_data = helper.Scenario()
     data['weather'] = class_data.weather
+    print('weather', type(class_data.weather.altimeter))
 
     time = helper.generate_random_time()
     data['time'] = time.strftime("%H%M")

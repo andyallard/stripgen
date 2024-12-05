@@ -83,10 +83,6 @@ def import_basic_data():
             for row in reader
         ]
 
-    # Verify
-    # print('joining_procedures', joining_procedures)
-    print('opposing_directions', opposing_directions)
-    # print('locations', locations)
     basic_data = {
         'joining_procedures': joining_procedures,
         'opposing_directions': opposing_directions,
@@ -307,6 +303,9 @@ def generate_phraseology(data):
     wind = str(data['weather'].print_wind()) if data['weather'].wind_speed >= 3 else 'CALM'
     phraseology += f'\nWIND {wind}'
     phraseology += f"\nALTIMETER {data['weather'].print_altimeter()}"
+    print(data['weather'].altimeter)
+    if (2899 >= data['weather'].altimeter) or (data['weather'].altimeter >= 3100):
+        phraseology +=f" I SAY AGAIN ALTIMETER {data['weather'].print_altimeter()}"
     phraseology += '\n\nTRAFFIC'
 
     if strip['type'] == 'A':
