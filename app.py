@@ -40,7 +40,7 @@ def arrival():
     data['strip']['comments'] = data['strip']['comments'].replace('\n', '<br>')
 
     if data['strip']['comments'] == '':
-        data['strip']['comments'] = f'Pass this as traffic in an advisory to {helper.generate_identifier()}'
+        data['strip']['comments'] = f'Pass this as traffic in an advisory to {random.choice(helper.aircraft_types)} {helper.generate_identifier()}'
 
     return render_template("strip.html", data=data)
 
@@ -59,7 +59,7 @@ def departure():
 
 
     if data['strip']['comments'] == '':
-        data['strip']['comments'] = f'Pass this as traffic in an advisory to {helper.generate_identifier()}'
+        data['strip']['comments'] = f'Pass this as traffic in an advisory to {random.choice(helper.aircraft_types)} {helper.generate_identifier()}'
 
     if data['strip']['timesincedeparture'] >= 0:
         data['strip']['comments'] = f"Expected to depart in {data['strip']['timesincedeparture']} min\n" + data['strip']['comments']
@@ -88,7 +88,7 @@ def overflight():
     data['response'] = helper.generate_response(data)
     data['response'] = data['response'].replace('\n', '<br>')
     if data['strip']['comments'] == '':
-        data['strip']['comments'] = f'Pass this as traffic in an advisory to {helper.generate_identifier()}'
+        data['strip']['comments'] = f'Pass this as traffic in an advisory to {random.choice(helper.aircraft_types)} {helper.generate_identifier()}'
     data['strip']['comments'] = data['strip']['comments'].replace('\n', '<br>')
     return render_template("strip.html", data=data)
 
