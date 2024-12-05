@@ -2,13 +2,13 @@ from flask import Flask, render_template, redirect, url_for
 import random
 import helper
 
-app1 = Flask(__name__)
+app = Flask(__name__)
 
 basic_data = helper.import_basic_data()
 
 # fss09 sim workbook
 
-@app1.route("/")
+@app.route("/")
 # @login_required
 def index():
     # data = execute_sql(
@@ -23,7 +23,7 @@ def index():
     return render_template("index.html", data=data)
 
 
-@app1.route("/arrival")
+@app.route("/arrival")
 def arrival():
     class_data = helper.Scenario()
     print(class_data)
@@ -40,11 +40,11 @@ def arrival():
     data['strip']['comments'] = data['strip']['comments'].replace('\n', '<br>')
 
     if data['strip']['comments'] == '':
-        data['strip']['comments'] = f'Pass this as traffic to {helper.generate_identifier()}'
+        data['strip']['comments'] = f'Pass this as traffic in an advisory to {helper.generate_identifier()}'
 
     return render_template("strip.html", data=data)
 
-@app1.route("/departure")
+@app.route("/departure")
 def departure():
     data = dict()
     time = helper.generate_random_time()
@@ -59,7 +59,7 @@ def departure():
 
 
     if data['strip']['comments'] == '':
-        data['strip']['comments'] = f'Pass this as traffic to {helper.generate_identifier()}'
+        data['strip']['comments'] = f'Pass this as traffic in an advisory to {helper.generate_identifier()}'
 
     if data['strip']['timesincedeparture'] >= 0:
         data['strip']['comments'] = f"Expected to depart in {data['strip']['timesincedeparture']} min\n" + data['strip']['comments']
@@ -73,7 +73,7 @@ def departure():
 
     return render_template("strip.html", data=data)
 
-@app1.route("/overflight")
+@app.route("/overflight")
 def overflight():
     data = dict()
     time = helper.generate_random_time()
@@ -88,11 +88,11 @@ def overflight():
     data['response'] = helper.generate_response(data)
     data['response'] = data['response'].replace('\n', '<br>')
     if data['strip']['comments'] == '':
-        data['strip']['comments'] = f'Pass this as traffic to {helper.generate_identifier()}'
+        data['strip']['comments'] = f'Pass this as traffic in an advisory to {helper.generate_identifier()}'
     data['strip']['comments'] = data['strip']['comments'].replace('\n', '<br>')
     return render_template("strip.html", data=data)
 
-@app1.route("/random")
+@app.route("/random")
 def random_strip():
     option = random.choices(
             ['arrival', 'departure', 'overflight'],

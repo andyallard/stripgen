@@ -381,13 +381,13 @@ def generate_distant_arrival_strip(time, locations, data):
     strip['altitude'] = generate_altitude(strip['FLdirection'])
 
     if random.random() > 0.667:
-        strip['comments'] += f"We are passing this aircraft as traffic in an advisory to {generate_identifier()}, a departing {strip['pointofdeparture']['compass point']} bound aircraft\n"
+        strip['comments'] += f"We are passing this aircraft as traffic in an advisory to {random.choice(aircraft_types)} {generate_identifier()}, a departing {strip['pointofdeparture']['compass point']} bound aircraft\n"
         strip['needaltitude'] = True
     else:
         inbound_location = random.choice(locations)
         if inbound_location['compass point'] == strip['pointofdeparture']['compass point']:
             strip['exactpositionrequired'] = True
-        strip['comments'] += f"We are passing this aircraft as traffic in an advisory to {generate_identifier()} inbound from the {inbound_location['compass point']}\n"
+        strip['comments'] += f"We are passing this aircraft as traffic in an advisory to {random.choice(aircraft_types)} {generate_identifier()} inbound from the {inbound_location['compass point']}\n"
         strip['reportingpointrequired'] = True
 
     # print(strip)
@@ -409,7 +409,7 @@ def generate_departure_strip(time, locations):
     strip['altitude'] = generate_altitude(strip['FLdirection'])
 
     if random.random() > 0.667:
-        strip['comments'] += f"We are passing this aircraft as traffic in an advisory to {generate_identifier()} inbound from the {strip['destination']['compass point']}\n"
+        strip['comments'] += f"We are passing this aircraft as traffic in an advisory to {random.choice(aircraft_types)} {generate_identifier()} inbound from the {strip['destination']['compass point']}\n"
         strip['needaltitude'] = True
         strip['reportingpointrequired'] = True
 
