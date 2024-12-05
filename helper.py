@@ -1,4 +1,6 @@
 import random
+import csv
+import os
 import string
 from datetime import datetime, timedelta
 
@@ -12,7 +14,7 @@ aircraft_types = [
 march = {
     "location": "CYMR", "common name": "MARCH", "compass point": "N", "distance (NM)": 0, "bearing": 0
     }
-  
+
 joining_procedures = {
     ("09", "N"): "LB",
     ("09", "NE"): "LB or LDW",
@@ -48,26 +50,31 @@ joining_procedures = {
     ("32", "NW"): "RDW"
 }
 
-def import_basic_data():
-    import csv
 
-    # Read the CSV into a dictionary
-    with open("data/joining_procedures.csv", "r") as csvfile:
+# Get the absolute path to the current directory of helper.py
+base_dir = os.path.dirname(__file__)
+
+def import_basic_data():
+
+    csv_file_path = os.path.join(base_dir, 'data', 'joining_procedures.csv')
+    with open(csv_file_path, "r") as csvfile:
         reader = csv.DictReader(csvfile)
         joining_procedures = {
             (row["Runway"], row["Direction"]): row["Procedure"]
             for row in reader
         }
 
+    csv_file_path = os.path.join(base_dir, 'data', 'opposing_directions.csv')
     opposing_directions = {}
-    with open("data/opposing_directions.csv","r") as csvfile:
+    with open(csv_file_path, "r") as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
             if len(row) == 2:  # Ensure that the row has two columns
                 key, value = row
                 opposing_directions[key] = value
 
-    with open("data/locations.csv", "r") as csvfile:
+    csv_file_path = os.path.join(base_dir, 'data', 'locations.csv')
+    with open(csv_file_path, "r") as csvfile:
         reader = csv.DictReader(csvfile)
         int_fields = ['distance (NM)', 'bearing']
         locations = [
@@ -108,7 +115,7 @@ class Weather:
         else:
             self.generate_altimeter()
 
-    def generate_wind_speed(self):  
+    def generate_wind_speed(self):
         # Wind is assumed to be most commonly light (5), with lower probability
         # of being anything else, decaying on either side of 5 knots
 
@@ -127,7 +134,7 @@ class Weather:
         # Normalize weights to make them a proper probability distribution
         weights = [w / sum(weights) for w in weights]
 
-        # Generate a random number with the specified weights        
+        # Generate a random number with the specified weights
         self.wind_speed = random.choices(values, weights=weights, k=1)[0]
 
     def generate_direction(self):
@@ -167,7 +174,7 @@ class Weather:
         s += f'\ngust speed: {self.gust}'
         s += f'\naltimeter: {self.altimeter}'
         return s
-    
+
     def __str__(self):
         s = f'{self.direction:03}/{self.wind_speed:02}'
         if self.gust > 0:
@@ -217,11 +224,11 @@ def generate_weather():
     direction = random.randint(0, 36) * 10
     if wind > 0 and direction == 0:
         direction = 360
-    
+
     if wind < 3:
         wind = 0
         gust = 0
-        direction = 0    
+        direction = 0
 
     # print(' wind: ', wind, 'gust: ', gust)  # for debugging
 
@@ -254,7 +261,7 @@ def generate_scenario_and_strip():
     # data['weather'] = helper.generate_weather()
 
     # TO DO
-    # data['determinedrunway'] = f'{helper.determine_runway(data['weather'], 'wind')}'   
+    # data['determinedrunway'] = f"{helper.determine_runway(data['weather'], 'wind')}"
 
     # data = dict()
 
@@ -350,7 +357,7 @@ def determine_runway(value, type):
 
 def generate_strip():
     strip = dict()
-    strip['identifier'] = generate_identifier()   
+    strip['identifier'] = generate_identifier()
     strip['aircrafttype'] = random.choice(aircraft_types)
     strip['comments'] = ''
     strip['needaltitude'] = False
@@ -374,13 +381,13 @@ def generate_distant_arrival_strip(time, locations, data):
     strip['altitude'] = generate_altitude(strip['FLdirection'])
 
     if random.random() > 0.667:
-        strip['comments'] += f'We are passing this aircraft as traffic in an advisory to {generate_identifier()}, a departing {strip['pointofdeparture']['compass point']} bound aircraft\n'
+        strip['comments'] += f"We are passing this aircraft as traffic in an advisory to {generate_identifier()}, a departing {strip['pointofdeparture']['compass point']} bound aircraft\n"
         strip['needaltitude'] = True
     else:
         inbound_location = random.choice(locations)
         if inbound_location['compass point'] == strip['pointofdeparture']['compass point']:
             strip['exactpositionrequired'] = True
-        strip['comments'] += f'We are passing this aircraft as traffic in an advisory to {generate_identifier()} inbound from the {inbound_location['compass point']}\n'
+        strip['comments'] += f"We are passing this aircraft as traffic in an advisory to {generate_identifier()} inbound from the {inbound_location['compass point']}\n"
         strip['reportingpointrequired'] = True
 
     # print(strip)
@@ -402,11 +409,11 @@ def generate_departure_strip(time, locations):
     strip['altitude'] = generate_altitude(strip['FLdirection'])
 
     if random.random() > 0.667:
-        strip['comments'] += f'We are passing this aircraft as traffic in an advisory to {generate_identifier()} inbound from the {strip['destination']['compass point']}\n'
+        strip['comments'] += f"We are passing this aircraft as traffic in an advisory to {generate_identifier()} inbound from the {strip['destination']['compass point']}\n"
         strip['needaltitude'] = True
         strip['reportingpointrequired'] = True
 
-    # strip['determinedrunway'] = f'\n{determine_runway(strip['destination'], 'location')}'
+    # strip['determinedrunway'] = f"\n{determine_runway(strip['destination'], 'location')}"
 
     # print(strip)
 
@@ -429,20 +436,20 @@ def generate_overflight_strip(time, locations, opposing_directions):
     strip['altitude'] = generate_overflight_altitude(strip['FLdirection'])
 
     # if random.random() > 0.667:
-    #     strip['comments'] += f'We are passing this aircraft as traffic in an advisory to to a departing {strip['pointofdeparture']['compass point']} bound aircraft\n'
+    #     strip['comments'] += f"We are passing this aircraft as traffic in an advisory to to a departing {strip['pointofdeparture']['compass point']} bound aircraft\n"
     #     strip['needaltitude'] = True
     # else:
     #     inbound_location = random.choice(locations)
     #     if inbound_location['compass point'] == strip['pointofdeparture']['compass point']:
     #         strip['exactpositionrequired'] = True
-    #     strip['comments'] += f'We are passing this aircraft as traffic in an advisory to to {generate_identifier()} inbound from the {inbound_location['compass point']}\n'
+    #     strip['comments'] += f"We are passing this aircraft as traffic in an advisory to to {generate_identifier()} inbound from the {inbound_location['compass point']}\n"
     #     strip['reportingpointrequired'] = True
 
     return strip
 
 def generate_phraseology(data):
     strip = data['strip']
-    phraseology = f'RUNWAY {data['determinedrunway']}'
+    phraseology = f"RUNWAY {data['determinedrunway']}"
     phraseology += f'\nWIND [wind], ALTIMETER [altimeter]'
     phraseology += '\n\nTRAFFIC'
 
@@ -450,37 +457,37 @@ def generate_phraseology(data):
         if strip['exactpositionrequired']:
             phraseology += f'[say exact position] [how long ago they reported]'
         else:
-            phraseology += f'\nINBOUND FROM THE {strip['pointofdeparture']['compass point']}'
-        phraseology += f'\n{strip['aircrafttype']}'
+            phraseology += f"\nINBOUND FROM THE {strip['pointofdeparture']['compass point']}"
+        phraseology += f"\n{strip['aircrafttype']}"
         if strip['needaltitude']:
-            phraseology += f'\nALTITUDE {strip['altitude'] * 100}'
-        phraseology += f'\nESTIMATING IN {strip['estimatingin']} MINUTE'
+            phraseology += f"\nALTITUDE {strip['altitude'] * 100}"
+        phraseology += f"\nESTIMATING IN {strip['estimatingin']} MINUTE"
         if strip['estimatingin'] != 1:
             phraseology += 'S'
         phraseology += f'\nWILL JOIN [how they will join]'
     elif strip['type'] == 'D':
         if strip['timesincedeparture'] == 0:
-            phraseology += f'\n(ABOUT TO DEPART / ENTERING) RUNWAY {data['determinedrunway']}'
+            phraseology += f"\n(ABOUT TO DEPART / ENTERING) RUNWAY {data['determinedrunway']}"
         elif strip['timesincedeparture'] < 0:
-            phraseology += f'\nDEPARTED {-strip['timesincedeparture']} MINUTE'
+            phraseology += f"\nDEPARTED {-strip['timesincedeparture']} MINUTE"
             if -strip['timesincedeparture'] != 1:
                 phraseology += 'S'
             phraseology += ' AGO'
         else:
-            phraseology += f'\nTAXIING FOR DEPARTURE RUNWAY {data['determinedrunway']}'
-        phraseology += f'\n{strip['destination']['compass point']} BOUND'
-        phraseology += f'\n{strip['aircrafttype']}'
+            phraseology += f"\nTAXIING FOR DEPARTURE RUNWAY {data['determinedrunway']}"
+        phraseology += f"\n{strip['destination']['compass point']} BOUND"
+        phraseology += f"\n{strip['aircrafttype']}"
         if strip['needaltitude']:
-            phraseology += f'\nPLANNING {strip['altitude'] * 100}'
+            phraseology += f"\nPLANNING {strip['altitude'] * 100}"
     elif strip['type'] == 'O':
-        phraseology += f'\nINBOUND FROM THE {strip['pointofdeparture']['compass point']}'
-        phraseology += f'\n{strip['destination']['compass point']} BOUND'
-        phraseology += f'\n{strip['aircrafttype']}'
-        phraseology += f'\nESTIMATING OVERHEAD IN {strip['estimatingin']} MINUTE'
+        phraseology += f"\nINBOUND FROM THE {strip['pointofdeparture']['compass point']}"
+        phraseology += f"\n{strip['destination']['compass point']} BOUND"
+        phraseology += f"\n{strip['aircrafttype']}"
+        phraseology += f"\nESTIMATING OVERHEAD IN {strip['estimatingin']} MINUTE"
         if strip['estimatingin'] != 1:
             phraseology += 'S'
         phraseology += f'\nTRANSITING THE ZONE'
-    
+
     return phraseology
 
 def generate_response(data):
