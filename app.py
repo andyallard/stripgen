@@ -26,16 +26,17 @@ def index():
 @app1.route("/arrival")
 def arrival():
     data = dict()
-    
+
     class_data = helper.Scenario()
-    # data['weather'] = helper.generate_weather()
-    data['weather'] = str(class_data.weather)
+    data['weather'] = class_data.weather
+
+    print('dir! = ', type(class_data.weather.direction), class_data.weather.direction)
 
     print(class_data)
     time = helper.generate_random_time()
     data['time'] = time.strftime("%H%M")
 
-    data['determinedrunway'] = f"{helper.determine_runway(data['weather'], 'wind')}"
+    data['determinedrunway'] = f"{helper.determine_runway(class_data.weather.direction, 'wind')}"
     data['strip'] = helper.generate_distant_arrival_strip(time, basic_data['locations'], data)
     data['phraseology'] = helper.generate_phraseology(data)
     data['phraseology'] = data['phraseology'].replace('\n', '<br>')
@@ -53,8 +54,8 @@ def departure():
     data = dict()
 
     class_data = helper.Scenario()
-    # data['weather'] = helper.generate_weather()
-    data['weather'] = str(class_data.weather)
+    data['weather'] = class_data.weather
+    
 
     time = helper.generate_random_time()
     data['time'] = time.strftime("%H%M")
@@ -62,7 +63,7 @@ def departure():
     data['strip'] = helper.generate_departure_strip(time, basic_data['locations'])
     # data['strip'] = helper.generate_departure_strip(time)
 
-    data['determinedrunway'] = f"{helper.determine_runway(data['weather'], 'wind'):02}"
+    data['determinedrunway'] = f"{helper.determine_runway(class_data.weather.direction, 'wind')}"
     data['phraseology'] = helper.generate_phraseology(data)
 
 
@@ -85,14 +86,12 @@ def departure():
 def overflight():
     data = dict()
     class_data = helper.Scenario()
-    # data['weather'] = helper.generate_weather()
-    data['weather'] = str(class_data.weather)
+    data['weather'] = class_data.weather
 
     time = helper.generate_random_time()
     data['time'] = time.strftime("%H%M")
     data['strip'] = helper.generate_overflight_strip(time, basic_data['locations'], basic_data['opposing_directions'])
-    # print(data['strip'])
-    # print(data)
+
     data['determinedrunway'] = f'{88:02}'
     data['phraseology'] = helper.generate_phraseology(data)
     data['phraseology'] = data['phraseology'].replace('\n', '<br>')

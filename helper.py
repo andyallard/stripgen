@@ -256,7 +256,7 @@ def determine_runway(value, type):
     if type == 'location':
         dir = value['bearing']
     elif type == 'wind':
-        dir = int(value[0:3])
+        dir = int(value)
     runways = (90, 140, 270, 320)
     differences = [bearing_difference(dir, runway) for runway in runways]
     runway = runways[differences.index(min(differences))]
@@ -364,7 +364,9 @@ def generate_overflight_strip(time, locations, opposing_directions):
 def generate_phraseology(data):
     strip = data['strip']
     phraseology = f"RUNWAY {data['determinedrunway']}"
-    phraseology += f'\nWIND [wind], ALTIMETER [altimeter]'
+    wind = str(data['weather'].print_wind()) if data['weather'].wind_speed >= 3 else 'CALM'
+    phraseology += f'\nWIND {wind}'
+    phraseology += f'\nALTIMETER {data['weather'].print_altimeter()}'
     phraseology += '\n\nTRAFFIC'
 
     if strip['type'] == 'A':

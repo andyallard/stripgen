@@ -22,6 +22,8 @@ class Weather:
         else:
             self.generate_altimeter()
 
+        self.set_calm_wind()
+
     def generate_wind_speed(self):
         # Wind is assumed to be most commonly light (5), with lower probability
         # of being anything else, decaying on either side of 5 knots
@@ -83,8 +85,14 @@ class Weather:
         return s
 
     def __str__(self):
+        return f'{self.print_wind()}  {self.print_altimeter()}'
+    
+    def print_wind(self):
         s = f'{self.direction:03}/{self.wind_speed:02}'
         if self.gust > 0:
             s += f'G{self.gust:02}'
-        s += f'   A{self.altimeter:04}'
         return s
+    
+    def print_altimeter(self):
+        return f'A{self.altimeter:04}'
+    
