@@ -1,0 +1,10 @@
+# Ignore all files/folders...
+# /**
+read.py
+write.py
+/.venv
+__pycache__/
+strip_old_DELETEME.html
+
+# ...except these ones
+# !/.gitignore
