@@ -2,13 +2,13 @@ from flask import Flask, render_template, redirect, url_for
 import random
 import helper
 
-app = Flask(__name__)
+app1 = Flask(__name__)
 
 basic_data = helper.import_basic_data()
 
 # fss09 sim workbook
 
-@app.route("/")
+@app1.route("/")
 # @login_required
 def index():
     # data = execute_sql(
@@ -23,7 +23,7 @@ def index():
     return render_template("index.html", data=data)
 
 
-@app.route("/arrival")
+@app1.route("/arrival")
 def arrival():
     class_data = helper.Scenario()
     print(class_data)
@@ -44,7 +44,7 @@ def arrival():
 
     return render_template("strip.html", data=data)
 
-@app.route("/departure")
+@app1.route("/departure")
 def departure():
     data = dict()
     time = helper.generate_random_time()
@@ -73,7 +73,7 @@ def departure():
 
     return render_template("strip.html", data=data)
 
-@app.route("/overflight")
+@app1.route("/overflight")
 def overflight():
     data = dict()
     time = helper.generate_random_time()
@@ -92,7 +92,7 @@ def overflight():
     data['strip']['comments'] = data['strip']['comments'].replace('\n', '<br>')
     return render_template("strip.html", data=data)
 
-@app.route("/random")
+@app1.route("/random")
 def random_strip():
     option = random.choices(
             ['arrival', 'departure', 'overflight'],
