@@ -6,19 +6,9 @@ app1 = Flask(__name__)
 
 basic_data = helper.import_basic_data()
 
-# fss09 sim workbook
-
 @app1.route("/")
 # @login_required
 def index():
-    # data = execute_sql(
-    #     "SELECT * FROM shopping_list "
-    #     # "SELECT * FROM shopping_list AS sl "
-    #     # "JOIN stores ON sl.store_id = stores.id "
-    #     "WHERE user_id = ?", (current_user.get_id()), empty_return=[]
-    #     # "WHERE sl.user_id = ?", (current_user.get_id()), empty_return=[]
-    #     # "WHERE sl.status != 0;"
-    # )
     data = ''
     return render_template("index.html", data=data)
 
@@ -26,13 +16,14 @@ def index():
 @app1.route("/arrival")
 def arrival():
     data = dict()
+    data['title'] = 'Distant Arrival'
 
     class_data = helper.Scenario()
     data['weather'] = class_data.weather
 
-    print('dir! = ', type(class_data.weather.direction), class_data.weather.direction)
+    # print('dir! = ', type(class_data.weather.direction), class_data.weather.direction)
 
-    print(class_data)
+    # print(class_data)
     time = helper.generate_random_time()
     data['time'] = time.strftime("%H%M")
 
@@ -53,6 +44,7 @@ def arrival():
 @app1.route("/departure")
 def departure():
     data = dict()
+    data['title'] = 'Departure'
 
     class_data = helper.Scenario()
     data['weather'] = class_data.weather
@@ -87,6 +79,8 @@ def departure():
 @app1.route("/overflight")
 def overflight():
     data = dict()
+    data['title'] = 'Overflight'
+    
     class_data = helper.Scenario()
     data['weather'] = class_data.weather
     print('weather', type(class_data.weather.altimeter))
