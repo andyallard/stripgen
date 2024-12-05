@@ -25,12 +25,16 @@ def index():
 
 @app1.route("/arrival")
 def arrival():
-    class_data = helper.Scenario()
-    print(class_data)
     data = dict()
+    
+    class_data = helper.Scenario()
+    # data['weather'] = helper.generate_weather()
+    data['weather'] = str(class_data.weather)
+
+    print(class_data)
     time = helper.generate_random_time()
     data['time'] = time.strftime("%H%M")
-    data['weather'] = helper.generate_weather()
+
     data['determinedrunway'] = f"{helper.determine_runway(data['weather'], 'wind')}"
     data['strip'] = helper.generate_distant_arrival_strip(time, basic_data['locations'], data)
     data['phraseology'] = helper.generate_phraseology(data)
@@ -47,13 +51,17 @@ def arrival():
 @app1.route("/departure")
 def departure():
     data = dict()
+
+    class_data = helper.Scenario()
+    # data['weather'] = helper.generate_weather()
+    data['weather'] = str(class_data.weather)
+
     time = helper.generate_random_time()
     data['time'] = time.strftime("%H%M")
 
     data['strip'] = helper.generate_departure_strip(time, basic_data['locations'])
     # data['strip'] = helper.generate_departure_strip(time)
 
-    data['weather'] = helper.generate_weather()
     data['determinedrunway'] = f"{helper.determine_runway(data['weather'], 'wind'):02}"
     data['phraseology'] = helper.generate_phraseology(data)
 
@@ -76,12 +84,15 @@ def departure():
 @app1.route("/overflight")
 def overflight():
     data = dict()
+    class_data = helper.Scenario()
+    # data['weather'] = helper.generate_weather()
+    data['weather'] = str(class_data.weather)
+
     time = helper.generate_random_time()
     data['time'] = time.strftime("%H%M")
     data['strip'] = helper.generate_overflight_strip(time, basic_data['locations'], basic_data['opposing_directions'])
     # print(data['strip'])
     # print(data)
-    data['weather'] = helper.generate_weather()
     data['determinedrunway'] = f'{88:02}'
     data['phraseology'] = helper.generate_phraseology(data)
     data['phraseology'] = data['phraseology'].replace('\n', '<br>')
