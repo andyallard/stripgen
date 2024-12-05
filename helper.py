@@ -94,66 +94,6 @@ def import_basic_data():
     }
     return basic_data
 
-
-# **************** TO DELETE!!!!!!!!! ****************
-
-# def generate_weather():
-#     # Define the peak and decay rates
-#     peak = 5
-#     left_decay = 1  # Faster decay on the left
-#     right_decay = 0.5  # Slower decay on the right
-#     values = list(range(0, 30))
-
-#     # Compute weights
-#     weights = [
-#         100 / (abs(i - peak) + 1)**(left_decay if i < peak else right_decay)
-#         for i in values
-#     ]
-
-#     # Normalize weights to make them a proper probability distribution
-#     weights = [w / sum(weights) for w in weights]
-#     # print(weights) # for debugging
-
-#     # Generate a random number with the specified weights
-#     wind = random.choices(values, weights=weights, k=1)[0]
-
-#     if wind < 10:
-#         gust = random.choice([0, 0, random.randint(5, 20)])
-#     elif wind < 15:
-#         gust = random.choice([0, random.randint(5, 20)])
-#     else:
-#         gust = random.choice([0, random.randint(5, 20), random.randint(5, 20)])
-
-#     # print(' wind: ', wind, 'gust: ', gust)  # for debugging
-
-#     # if gust > 0 and (wind + gust) < 15:
-#     if gust > 0 and (wind + gust) < 15:
-#         gust = 15 - wind
-
-#     if gust > 0:
-#         gust += wind  # gust is calculated as an amount over the wind speed, then finally it's converted actual gust speed
-
-#     altimeter = random.randint(2885, 3115)
-
-#     direction = random.randint(0, 36) * 10
-#     if wind > 0 and direction == 0:
-#         direction = 360
-
-#     if wind < 3:
-#         wind = 0
-#         gust = 0
-#         direction = 0
-
-#     # print(' wind: ', wind, 'gust: ', gust)  # for debugging
-
-#     weather = f'{direction:03}/{wind:02}'
-#     if gust > 0:
-#         weather += f'G{gust:02}'
-#     weather += f'   A{altimeter:04}'
-
-#     return weather
-
-
 class Scenario:
     def __init__(self) -> None:
         self.time = generate_random_time()

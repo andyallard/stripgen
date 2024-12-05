@@ -37,6 +37,7 @@ def arrival():
     data['time'] = time.strftime("%H%M")
 
     data['determinedrunway'] = f"{helper.determine_runway(class_data.weather.direction, 'wind')}"
+    data['striprunway'] = data['determinedrunway']
     data['strip'] = helper.generate_distant_arrival_strip(time, basic_data['locations'], data)
     data['phraseology'] = helper.generate_phraseology(data)
     data['phraseology'] = data['phraseology'].replace('\n', '<br>')
@@ -64,6 +65,7 @@ def departure():
     # data['strip'] = helper.generate_departure_strip(time)
 
     data['determinedrunway'] = f"{helper.determine_runway(class_data.weather.direction, 'wind')}"
+    data['striprunway'] = data['determinedrunway']
     data['phraseology'] = helper.generate_phraseology(data)
 
 
@@ -92,7 +94,8 @@ def overflight():
     data['time'] = time.strftime("%H%M")
     data['strip'] = helper.generate_overflight_strip(time, basic_data['locations'], basic_data['opposing_directions'])
 
-    data['determinedrunway'] = f'{88:02}'
+    data['determinedrunway'] = f"{helper.determine_runway(class_data.weather.direction, 'wind')}"
+    data['striprunway'] = f'{88:02}'
     data['phraseology'] = helper.generate_phraseology(data)
     data['phraseology'] = data['phraseology'].replace('\n', '<br>')
     data['response'] = helper.generate_response(data)
