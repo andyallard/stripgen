@@ -2,40 +2,42 @@
 
 <html lang="en">
 
-    <head>
+<head>
 
-        <meta charset="utf-8">
-        <meta name="viewport" content="initial-scale=1, width=device-width">
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, width=device-width">
 
-        <!-- http://getbootstrap.com/docs/5.1/ -->
-        <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" rel="stylesheet">
-        <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"></script>
+    <!-- http://getbootstrap.com/docs/5.1/ -->
+    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" rel="stylesheet">
+    <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"></script>
 
-        <link rel="icon" href="/static/icons/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/static/icons/favicon.ico" type="image/x-icon">
 
-        <!-- Include jQuery -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        
-        <!-- Custom Stylesheet -->
-        <link href="/static/styles.css" rel="stylesheet">
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Custom Stylesheet -->
+    <link href="/static/styles.css" rel="stylesheet">
 
-        <title>stripgen: {% block title %}{% endblock %}</title>
+    <title>stripgen: {% block title %}{% endblock %}</title>
 
-    </head>
+</head>
 
-    <body>
+<body>
 
-        <main>
-            <div class="navbar d-flex justify-content-center mb-4">
-                <a href="/random"><button class="btn btn-primary">Random</button></a>
-                <a href="/arrival"><button class="btn btn-secondary">New Arrival</button></a>
-                <a href="/departure"><button class="btn btn-secondary">New Departure</button></a>
-                <a href="/overflight"><button class="btn btn-secondary">New Overflight</button></a>
-            </div>
+    <main>
+        <div class="navbar d-flex justify-content-center mb-4">
+            <a href="/random"><button class="btn btn-primary">Random</button></a>
+            <a href="/arrival"><button class="btn btn-secondary">New Arrival</button></a>
+            <a href="/departure"><button class="btn btn-secondary">New Departure</button></a>
+            <a href="/circuit"><button class="btn btn-secondary">New Circuit</button></a>
+            <a href="/overflight"><button class="btn btn-secondary">New Overflight</button></a>
+        </div>
 
-            {% block main %}{% endblock %}
-        </main>
+        {% block main %}{% endblock %}
 
-    </body>
+    </main>
+
+</body>
 
 </html>

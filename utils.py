@@ -90,16 +90,6 @@ def import_basic_data():
     }
     return basic_data
 
-class Scenario:
-    def __init__(self) -> None:
-        self.time = generate_random_time()
-        self.weather = Weather()
-
-    def __str__(self) -> str:
-        s = 'CLASS DATA\n'
-        s += self.time.strftime("%H%M")
-        s += '\n' + str(self.weather)
-        return s
 
 def generate_scenario_and_strip():
     scenario = Scenario()
@@ -108,10 +98,10 @@ def generate_scenario_and_strip():
     # DONE
     # time = helper.generate_random_time()
     # data['time'] = time.strftime("%H%M")
-    # data['weather'] = helper.generate_weather()
+    # class_data.weather = helper.generate_weather()
 
     # TO DO
-    # data['determinedrunway'] = f"{helper.determine_runway(data['weather'], 'wind')}"
+    # data['determinedrunway'] = f"{helper.determine_runway(class_data.weather, 'wind')}"
 
     # data = dict()
 
@@ -128,17 +118,7 @@ def generate_scenario_and_strip():
 
     # return render_template("strip.html", data=data)
 
-def generate_identifier():
-    first_letter = 'C'
-    second_letter = random.choice(['F', 'G'])
-    remaining_letters = ''.join(random.choices(string.ascii_uppercase, k=3))
-    return f"{first_letter}{second_letter}{remaining_letters}"
 
-def generate_random_time():
-    random_hour = random.randint(0, 23)
-    random_minute = random.randint(0, 59)
-    random_time = datetime.strptime(f"{random_hour:02}:{random_minute:02}", "%H:%M")
-    return random_time
 
 def generate_arrival_time(time):
     values = list(range(5, 20))
@@ -164,7 +144,9 @@ def generate_departure_time(time):
     departure_time = time + timedelta(minutes=estimating)
     return departure_time.strftime("%H%M"), estimating
 
-def generate_altitude(FLdirection):
+def generate_altitude(FLdirection=None):
+    if FLdirection is None:
+        FLdirection = random.choice(['east', 'west'])
     altitude = random.randint(2, 6)
     altitude *= 20
     altitude += 5
@@ -188,33 +170,12 @@ def bearing_difference(bearing1, runway):
     # print(f'difference between {bearing1} and {runway} is {difference}')
     return difference
 
-def determine_runway(value, type):
-    if type == 'location':
-        dir = value['bearing']
-    elif type == 'wind':
-        dir = int(value)
-    runways = (90, 140, 270, 320)
-    differences = [bearing_difference(dir, runway) for runway in runways]
-    runway = runways[differences.index(min(differences))]
-    # print(f'runway, differences = {runway}, {differences}')
-    runway = int(runway / 10)
-    return f'{runway:02}'
 
 # def determine_joining_procedure(data):
 #     joining = joining_procedures[(data['determinedrunway'], data['strip']['location']['compass point'])]
 #     print(joining)
 #     return joining
 
-def generate_strip():
-    strip = dict()
-    strip['identifier'] = generate_identifier()
-    strip['aircrafttype'] = random.choice(aircraft_types)
-    strip['comments'] = ''
-    strip['needaltitude'] = False
-    strip['reportingpointrequired'] = False
-    strip['exactpositionrequired'] = False
-    strip['timesincedeparture'] = ''
-    return strip
 
 def generate_distant_arrival_strip(time, locations, data):
     strip = generate_strip()
@@ -231,13 +192,13 @@ def generate_distant_arrival_strip(time, locations, data):
     strip['altitude'] = generate_altitude(strip['FLdirection'])
 
     if random.random() > 0.667:
-        strip['comments'] += f"We are passing this aircraft as traffic in an advisory to {random.choice(aircraft_types)} {generate_identifier()}, a departing {strip['pointofdeparture']['compass point']} bound aircraft\n"
+        strip['comments'] += f"We are passing this aircraft as traffic in an advisory to {random.choice(aircraft_types)} {generate_identifier()}, a departing {strip['pointofdeparture']['compass point']} bound aircraft planning {generate_altitude() * 100} feet\n"
         strip['needaltitude'] = True
     else:
         inbound_location = random.choice(locations)
         if inbound_location['compass point'] == strip['pointofdeparture']['compass point']:
             strip['exactpositionrequired'] = True
-        strip['comments'] += f"We are passing this aircraft as traffic in an advisory to {random.choice(aircraft_types)} {generate_identifier()} inbound from the {inbound_location['compass point']}\n"
+        strip['comments'] += f"We are passing this aircraft as traffic in an advisory to {random.choice(aircraft_types)} {generate_identifier()} at {generate_altitude() * 100} feet inbound from the {inbound_location['compass point']}\n"
         strip['reportingpointrequired'] = True
 
     # print(strip)
@@ -259,7 +220,7 @@ def generate_departure_strip(time, locations):
     strip['altitude'] = generate_altitude(strip['FLdirection'])
 
     if random.random() > 0.667:
-        strip['comments'] += f"We are passing this aircraft as traffic in an advisory to {random.choice(aircraft_types)} {generate_identifier()} inbound from the {strip['destination']['compass point']}\n"
+        strip['comments'] += f"We are passing this aircraft as traffic in an advisory to {random.choice(aircraft_types)} {generate_identifier()} at {generate_altitude() * 100} feet inbound from the {strip['destination']['compass point']}\n"
         strip['needaltitude'] = True
         strip['reportingpointrequired'] = True
 
@@ -297,15 +258,15 @@ def generate_overflight_strip(time, locations, opposing_directions):
 
     return strip
 
-def generate_phraseology(data):
+def generate_phraseology(data, class_data):
     strip = data['strip']
     phraseology = f"RUNWAY {data['determinedrunway']}"
-    wind = str(data['weather'].print_wind()) if data['weather'].wind_speed >= 3 else 'CALM'
+    wind = str(class_data.weather.print_wind()) if class_data.weather.wind_speed >= 3 else 'CALM'
     phraseology += f'\nWIND {wind}'
-    phraseology += f"\nALTIMETER {data['weather'].print_altimeter()}"
+    phraseology += f"\nALTIMETER {class_data.weather.print_altimeter()}"
     
-    if (2899 >= data['weather'].altimeter) or (data['weather'].altimeter >= 3100):
-        phraseology +=f" I SAY AGAIN ALTIMETER {data['weather'].print_altimeter()}"
+    if (2899 >= class_data.weather.altimeter) or (class_data.weather.altimeter >= 3100):
+        phraseology +=f" I SAY AGAIN ALTIMETER {class_data.weather.print_altimeter()}"
     phraseology += '\n\nTRAFFIC'
 
     if strip['type'] == 'A':
@@ -351,3 +312,103 @@ def generate_response(data):
     if strip['reportingpointrequired']:
         response += f'REPORT (over/abeam/etc) [reporting point]\n'
     return response
+
+
+
+class Scenario:
+    def __init__(self, basic_data, time=None) -> None:
+        self.generate_random_time(time)
+        self.weather = Weather()
+        self.determine_runway()
+        self.basic_data = basic_data
+        self.aircraft = dict()
+
+    def __repr__(self):
+        s = f'{self.title} Scenario:'
+        s += "\nweather: {self.weather}"
+
+    def __str__(self) -> str:
+        s = f'{self.title} Scenario:\n'
+        s += f'  {self.formatted_time()}  '
+        s += f'  {self.weather}\n'
+        s += f'{self.formatted_aircraft(indent=4)}'
+        return s
+    
+    def set_title(self, title):
+        self.title = title
+
+    def generate_random_time(self, time):
+        random_hour = random.randint(0, 23)
+        random_minute = random.randint(0, 59)
+        self.time = datetime.strptime(f"{random_hour:02}:{random_minute:02}", "%H:%M") if time is None else time
+
+    def formatted_time(self):
+        return self.time.strftime("%H%M")
+    
+    def formatted_aircraft(self, indent=0):
+        s = ''
+        for k, v in self.aircraft.items():
+            s += ' ' * indent
+            s += f'{repr(v)}\n'
+        return s
+
+    def determine_runway(self):
+        pass
+
+    def add_aircraft(self, name=None):
+        if name is None:
+            name = f"aircraft{len(self.aircraft) + 1}"
+        self.aircraft[name] = Strip(self.basic_data)
+
+
+def determine_runway(value, type):
+    if type == 'location':
+        dir = value['bearing']
+    elif type == 'wind':
+        dir = int(value)
+    runways = (90, 140, 270, 320)
+    differences = [bearing_difference(dir, runway) for runway in runways]
+    runway = runways[differences.index(min(differences))]
+    # print(f'runway, differences = {runway}, {differences}')
+    runway = int(runway / 10)
+    return f'{runway:02}'
+
+
+class Strip:
+    def __init__(self, basic_data):
+        self.generate_identifier()
+
+    def __repr__(self):
+        s = f"{self.ident}: "
+        return s
+    
+    def __str__(self):
+        s = 'Flight Data Entry (strip)'
+        s += f"\n   identifier: {self.ident}"
+        return s
+
+    def generate_identifier(self):
+        first_letter = 'C'
+        second_letter = random.choice(['F', 'G'])
+        remaining_letters = ''.join(random.choices(string.ascii_uppercase, k=3))
+        self.ident = f"{first_letter}{second_letter}{remaining_letters}"
+
+
+def generate_identifier():
+    first_letter = 'C'
+    second_letter = random.choice(['F', 'G'])
+    remaining_letters = ''.join(random.choices(string.ascii_uppercase, k=3))
+    return f"{first_letter}{second_letter}{remaining_letters}"
+
+
+
+def generate_strip():
+    strip = dict()
+    strip['identifier'] = generate_identifier()
+    strip['aircrafttype'] = random.choice(aircraft_types)
+    strip['comments'] = ''
+    strip['needaltitude'] = False
+    strip['reportingpointrequired'] = False
+    strip['exactpositionrequired'] = False
+    strip['timesincedeparture'] = ''
+    return strip

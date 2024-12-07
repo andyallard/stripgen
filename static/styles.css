@@ -12,6 +12,10 @@ body {
   color: #ddd;
 }
 
+a button {
+  margin: 1px;
+}
+
 #phraseology {
   white-space: normal;
   text-align: left;
@@ -41,7 +45,7 @@ body {
   overflow: hidden;
 }
 
-/* Styling for grid items */
+/* Styling for grid (strip) items */
 .grid-item {
   background-color: #444;
   color: #ddd;
@@ -54,7 +58,7 @@ body {
   box-sizing: border-box;
 }
 
-/* Custom area placements */
+/* Custom area placements for strip */
 .col1 { grid-column: 1 / 2; grid-row: 1 / span 2; } /* Left empty */
 .col2 { grid-column: 2 / 3; grid-row: 1; }
 .col3 { grid-column: 3 / 4; grid-row: 1; }
@@ -68,3 +72,48 @@ body {
 .col7 { grid-column: 7 / 8; grid-row: 1; }
 .col7-bottom { grid-column: 7 / 8; grid-row: 2; }
 .col8 { grid-column: 8 / 9; grid-row: 1 / span 2; }
+
+
+
+
+/* container for the circuit diagram */
+.container {
+    height: auto;
+    display: flex;
+    flex-direction: column;  /* Arrange items in a column */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+/* Optional: Style for the aircraft image */
+#airplane {
+    transition: transform 1s ease-in-out;
+}
+
+/* Circuit path and its container */
+svg {
+    width: 100%;
+    height: auto;
+}
+
+/* Container for the road */
+.road {
+    width: 75%;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: -10;
+}
+
+/* Dotted line (simulating dashed line) */
+.dotted-line {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    border-top: 2px dashed white;
+    transform: translateY(-50%);
+    z-index: -5;
+}
