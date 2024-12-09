@@ -1,4 +1,74 @@
 import random
+import string
+from datetime import datetime, timedelta
+
+
+aircraft_types = [
+    "BE20", "BE76", "C150", "C172", "C182", "C185", "C206", "C208", "C210", "C421", "C550",
+    "DHC2", "DHC6", "DV20", "PC12", "P28A", "PA31", "PA34", "PAY2",
+    "B190", "DH8A", "DH8B", "DH8C", "DH8D", "SW4", "C130", "SF34",
+    "A320", "B737", "CRJ1", "CL60", "E175", "LJ35", "B06", "R44", "H46",
+]
+class Scenario:
+    def __init__(self, basic_data, time=None) -> None:
+        self.generate_random_time(time)
+        self.weather = Weather()
+        self.basic_data = basic_data
+        self.aircraft = dict()
+
+    def __repr__(self):
+        s = f'{self.title} Scenario - Weather: {self.weather}, '
+        s += f" {self.aircraft.length} aircraft"
+
+    def __str__(self) -> str:
+        s = f'{self.title} Scenario:\n'
+        s += f'  {self.formatted_time()}  '
+        s += f'  {self.weather}\n'
+        s += f'{self.formatted_aircraft(indent=4)}'
+        return s
+
+    def set_title(self, title):
+        self.title = title
+
+    def generate_random_time(self, time):
+        random_hour = random.randint(0, 23)
+        random_minute = random.randint(0, 59)
+        self.time = datetime.strptime(f"{random_hour:02}:{random_minute:02}", "%H:%M") if time is None else time
+
+    def formatted_time(self):
+        return self.time.strftime("%H%M")
+
+    def formatted_aircraft(self, indent=0):
+        s = ''
+        for k, v in self.aircraft.items():
+            s += ' ' * indent
+            s += f'{k}, {repr(v)}\n'
+        return s
+
+    def determine_runway(self):
+        pass
+
+    def generate_name(self, name):
+        if name is None:
+            return f"aircraft{len(self.aircraft) + 1}"
+        else:
+            return name
+
+    def add_aircraft(self, name=None):
+        self.aircraft[self.generate_name(name)] = Strip(self.basic_data, self.time, self.weather)
+
+    def add_distant_arrival(self, name=None):
+        self.aircraft[self.generate_name(name)] = Distant_Arrival_Strip(self.basic_data, self.time, self.weather)
+
+    def add_departure(self, name=None):
+        self.aircraft[self.generate_name(name)] = Departure_Strip(self.basic_data, self.time, self.weather)
+
+    def add_circuit(self, name=None):
+        self.aircraft[self.generate_name(name)] = Circuit_Strip(self.basic_data, self.time, self.weather)
+
+    def add_overflight(self, name=None):
+        self.aircraft[self.generate_name(name)] = Overflight_Strip(self.basic_data, self.time, self.weather)
+
 
 class Weather:
     def __init__(self, wind_speed=None, direction=None, gust=None, altimeter=None) -> None:
@@ -94,3 +164,174 @@ class Weather:
     def print_altimeter(self):
         return f'A{self.altimeter:04}'
     
+
+
+class Strip:
+    def __init__(self, basic_data, time, weather):
+        self.generate_identifier()
+        self.generate_aircraft_type(aircraft_types)
+        self.flight_rules = 'V'
+        self.set_type()
+        self.set_destination(basic_data)
+        self.set_point_of_departure(basic_data)
+        self.determine_track()
+        self.determine_runway(weather)
+        self.eta = None
+        self.departure_time = None
+        self.altitude = None
+        self.determine_fl_direction()
+        self.generate_altitude()
+
+    def __repr__(self):
+        s = f"{self.type} - {self.ident}: {self.aircraft_type} | "
+        s += f"DR: {self.determined_runway} | "
+        s += f"{self._fl_direction} {self.point_of_departure['location']} > "
+        s += f"{self.destination['location']}, "
+        s += f"arr: {self.formatted_eta()}, "
+        s += f" alt: {self.altitude}"
+        return s
+    
+    def __str__(self):
+        s = 'Flight Data Entry (strip)'
+        s += f"\n   identifier: {self.ident}"
+        s += f"\n   aircraft type: {self.aircraft_type}"
+        s += f"\n   flight type: {self.type}"
+        s += f"\n   point of departure: {self.point_of_departure['location']}"
+        s += f"\n   destination: {self.destination['location']}"
+        return s
+
+    def generate_identifier(self):
+        first_letter = 'C'
+        second_letter = random.choice(['F', 'G'])
+        remaining_letters = ''.join(random.choices(string.ascii_uppercase, k=3))
+        self.ident = f"{first_letter}{second_letter}{remaining_letters}"
+    
+    def generate_aircraft_type(self, types):
+        self.aircraft_type = random.choice(types)
+
+    def set_type(self):
+        self.type = None
+
+    def set_destination(self, basic_data):
+        self.destination = basic_data['march']
+
+    def set_point_of_departure(self, basic_data):
+        self.point_of_departure = basic_data['march']
+
+    def generate_eta(self, time):
+        values = list(range(5, 20))
+        weights = [(20 - i) for i in values]
+
+        # Normalize weights to make them a proper probability distribution
+        weights = [w / sum(weights) for w in weights]
+
+        # Generate a random number with the specified weights
+        estimating = random.choices(values, weights=weights, k=1)[0]
+        self.eta = time + timedelta(minutes=estimating)
+
+    def formatted_eta(self):
+        if self.eta is None:
+            return ''
+        else:
+            return self.eta.strftime("%H%M")
+    
+    def generate_altitude(self):
+        if self._fl_direction == '':
+            self.altitude = ''
+        else:
+            self.altitude = random.randint(2, 6)
+            self.altitude *= 20
+            self.altitude += 5
+            if self._fl_direction == 'east':
+                self.altitude -= 10
+
+    def determine_track(self):
+        self.track = 0
+
+    def determine_fl_direction(self):
+        self._fl_direction = ''
+
+    def determine_runway(self, weather):
+        runways = (90, 140, 270, 320)
+
+        if weather.wind_speed >= 5:
+            dir = weather.direction
+        else:
+            dir = self.track
+
+        differences = [self.bearing_difference(dir, runway) for runway in runways]
+        runway = runways[differences.index(min(differences))]
+        runway = int(runway / 10)
+        self.determined_runway = f'{runway:02}'
+
+    def bearing_difference(self, bearing1, runway):
+        difference = abs(runway - bearing1)
+        if difference > 180:
+            difference = 360 - difference
+        # print(f'difference between {bearing1} and {runway} is {difference}')
+        return difference
+        
+class Distant_Arrival_Strip(Strip):
+    def __init__(self, basic_data, time, weather):
+        super().__init__(basic_data, time, weather)        
+        self.generate_eta(time)
+
+    def set_type(self):
+        self.type = 'A'
+
+    def set_point_of_departure(self, basic_data):
+        self.point_of_departure = random.choice(basic_data['locations'])
+
+    def determine_track(self):
+        self.track = self.point_of_departure['bearing']
+
+    def determine_fl_direction(self):
+        if 0 <= self.point_of_departure['bearing'] < 180:
+            self._fl_direction = 'west'
+        else:
+            self._fl_direction = 'east'
+        
+
+class Departure_Strip(Strip):
+
+    def set_type(self):
+        self.type = 'D'
+
+    def set_destination(self, basic_data):
+        self.destination = random.choice(basic_data['locations'])
+
+    def determine_track(self):
+        self.track = self.destination['bearing']
+
+    def determine_fl_direction(self):
+        if 0 <= self.destination['bearing'] < 180:
+            self._fl_direction = 'east'
+        else:
+            self._fl_direction = 'west'
+
+class Circuit_Strip(Strip):
+
+    def set_type(self):
+        self.type = 'C'
+
+class Overflight_Strip(Strip):
+
+    def set_type(self):
+        self.type = 'O'
+
+    def determine_fl_direction(self):
+        # technically this could be inaccurate for overflights
+        # (ex. flying from a destination at 160 to one at 009)
+        # but for the purpose of this application, it's not too important
+        if 0 <= self.destination['bearing'] < 180:
+            self._fl_direction = 'east'
+        else:
+            self._fl_direction = 'west'
+
+    def generate_altitude(self):
+        options = [28, 29, 30]
+        if self._fl_direction == 'east':
+            options += [35]
+        elif self._fl_direction == 'west':
+            options += [45]
+        self.altitude = random.choice(options)

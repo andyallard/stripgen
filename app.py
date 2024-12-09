@@ -22,9 +22,12 @@ def arrival():
     scenario = Scenario(basic_data)
     scenario.set_title('Distant Arrival')
     scenario.add_aircraft()
-    scenario.add_aircraft()
-    scenario.add_aircraft()
-    scenario.add_aircraft()
+    scenario.add_distant_arrival()
+    scenario.add_distant_arrival()
+    scenario.add_overflight()
+    scenario.add_overflight()
+    scenario.add_circuit()
+    scenario.add_departure()
 
     print(scenario)
 
