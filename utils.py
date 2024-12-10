@@ -3,8 +3,6 @@ import csv
 import os
 import string
 from datetime import datetime, timedelta
-from models import Weather, Scenario
-from models import Strip, Distant_Arrival_Strip, Departure_Strip, Circuit_Strip, Overflight_Strip
 
 aircraft_types = [
     "BE20", "BE76", "C150", "C172", "C182", "C185", "C206", "C208", "C210", "C421", "C550",
@@ -61,6 +59,26 @@ def import_basic_data():
     }
 
     return basic_data
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def generate_phraseology(data, class_data):
@@ -228,6 +246,15 @@ def generate_distant_arrival_strip(time, locations, data):
 #     joining = joining_procedures[(data['determinedrunway'], data['strip']['location']['compass point'])]
 #     print(joining)
 #     return joining
+
+
+
+
+
+
+
+
+
 
 
 

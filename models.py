@@ -176,15 +176,15 @@ class Strip:
         self.set_point_of_departure(basic_data)
         self.determine_track()
         self.determine_runway(weather)
-        self.eta = None
+        self.set_actual_runway()
         self.departure_time = None
-        self.altitude = None
         self.determine_fl_direction()
         self.generate_altitude()
+        self.eta = None
 
     def __repr__(self):
         s = f"{self.type} - {self.ident}: {self.aircraft_type} | "
-        s += f"DR: {self.determined_runway} | "
+        s += f"DR: {self.determined_runway} AR: {self.actual_runway} | "
         s += f"{self._fl_direction} {self.point_of_departure['location']} > "
         s += f"{self.destination['location']}, "
         s += f"arr: {self.formatted_eta()}, "
@@ -270,6 +270,9 @@ class Strip:
             difference = 360 - difference
         # print(f'difference between {bearing1} and {runway} is {difference}')
         return difference
+
+    def set_actual_runway(self):
+        self.actual_runway = self.determined_runway
         
 class Distant_Arrival_Strip(Strip):
     def __init__(self, basic_data, time, weather):
@@ -315,9 +318,15 @@ class Circuit_Strip(Strip):
         self.type = 'C'
 
 class Overflight_Strip(Strip):
+    def __init__(self, basic_data, time, weather):
+        super().__init__(basic_data, time, weather)        
+        self.generate_eta(time)
 
     def set_type(self):
         self.type = 'O'
+
+    def set_actual_runway(self):
+        self.actual_runway = '88'
 
     def determine_fl_direction(self):
         # technically this could be inaccurate for overflights

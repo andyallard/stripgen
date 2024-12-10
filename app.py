@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for
 import random
 import utils
-from utils import Scenario, Strip
+from models import Scenario
 
 app1 = Flask(__name__)
 
@@ -109,7 +109,7 @@ def overflight():
 def random_strip():
     option = random.choices(
             ['arrival', 'departure', 'overflight'],
-            weights = [3, 2, 1],
+            weights = [4, 3, 1],
             k = 1
         )
     return redirect(url_for(option[0]))
