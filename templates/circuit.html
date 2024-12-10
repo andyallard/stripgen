@@ -1,0 +1,49 @@
+<!-- Bootstrap Container for Centering -->
+<div class="container d-flex justify-content-center">
+  <!-- SVG for the circuit -->
+  <svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+      <!-- The circuit path with more rounded corners -->
+      <path
+          d="M30 5 H170 A25 25 0 0 1 195 30 V70 A25 25 0 0 1 170 95 H30 A25 25 0 0 1 5 70 V25 A25 25 0 0 1 30 5 Z"
+          fill="none"
+          stroke="#555"
+          stroke-width="0.5"
+          id="circuit-path"
+      />
+      <!-- Aircraft image -->
+      <image href="https://upload.wikimedia.org/wikipedia/commons/6/6b/FlyingPete_Icons-Cessna172-withProp.svg" 
+          width="10" height="10" id="airplane">
+      </image>
+  </svg>
+
+  <div class="road bg-secondary">
+      <div class="dotted-line"></div>
+      <div class="text-white bg-secondary big">RUNWAY</div>
+  </div>
+  
+</div>
+
+<script>
+  // for animating the circuit
+  const path = document.querySelector('#circuit-path');
+  const airplane = document.querySelector('#airplane');
+  const pathLength = path.getTotalLength();
+  
+  let offset = 1000 * Math.random() * pathLength;  // Start at a random position
+  const duration = 270000; // Duration of one complete lap in milliseconds
+  const fps = 60;
+
+  function animate() {
+      const progress = (offset % duration) / duration;
+      const point = path.getPointAtLength(progress * pathLength);
+
+      // Position the airplane at the correct point along the path
+      airplane.setAttribute('x', point.x - 5);  // Adjust for the image width
+      airplane.setAttribute('y', point.y - 5);  // Adjust for the image height
+
+      offset += 1000 / fps;
+      requestAnimationFrame(animate);
+  }
+
+  animate();  // Start the animation
+</script>

@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    {{ scenario.title }}
+{% endblock %}
+
+{% block main %}
+
+<div class="big">
+    Current Time: {{ scenario.formatted_time() }}
+</div>
+
+<div class="big">
+    {{ scenario.weather }}
+</div>
+
+{% for strip_name, strip in scenario.aircraft.items() %}
+
+    {% include "strip.html" %}
+
+{% endfor %}
+
+<div class="comments d-flex justify-content-center">
+    <p>
+         data.strip.comments|safe 
+    </p>
+</div>
+
+<div class="d-flex justify-content-center">
+    <button class="btn btn-primary" onclick="toggleDiv()">Show Phraseology</button>
+</div>
+
+<div class="d-flex justify-content-center">
+    <div class="hidden" id="phraseology">
+        <div>
+             data.phraseology|safe 
+        </div>
+        <br>
+        <div>
+            <p class="text-primary">
+                To say after they give intended runway:
+            </p>
+            <p>
+                 data.response|safe 
+            </p>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="/static/strip.js"></script>
+
+<script>
+    function toggleDiv() {
+        const div = document.getElementById("phraseology");
+        div.classList.toggle("hidden");
+    }
+</script>
+
+{% if show_circuit %}
+
+    {% include "circuit.html" %}
+
+{% endif %}
+
+{% endblock %}

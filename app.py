@@ -14,6 +14,14 @@ def index():
     data = ''
     return render_template("index.html", data=data)
 
+@app1.route("/random")
+def random_strip():
+    option = random.choices(
+            ['arrival', 'departure', 'overflight'],
+            weights = [4, 3, 1],
+            k = 1
+        )
+    return redirect(url_for(option[0]))
 
 @app1.route("/arrival")
 def arrival():
@@ -22,11 +30,13 @@ def arrival():
     scenario = Scenario(basic_data)
     scenario.set_title('Distant Arrival')
     scenario.add_aircraft()
+    scenario.add_departure()
     scenario.add_distant_arrival()
     scenario.add_distant_arrival()
     scenario.add_overflight()
     scenario.add_overflight()
     scenario.add_circuit()
+    scenario.add_departure()
     scenario.add_departure()
 
     print(scenario)
@@ -43,7 +53,7 @@ def arrival():
     if data['strip']['comments'] == '':
         data['strip']['comments'] = f'Pass this as traffic in an advisory to {random.choice(utils.aircraft_types)} {scenario.aircraft['aircraft2'].ident}'
 
-    return render_template("strip.html", data=data, scenario=scenario)
+    return render_template("scenario.html", data=data, scenario=scenario)
 
 
 @app1.route("/departure")
@@ -73,15 +83,15 @@ def departure():
     data['response'] = data['response'].replace('\n', '<br>')
     data['strip']['comments'] = data['strip']['comments'].replace('\n', '<br>')
 
-    return render_template("strip.html", data=data, scenario=scenario)
+    return render_template("scenario.html", data=data, scenario=scenario)
 
 
 @app1.route("/circuit")
 def circuit():
     scenario = Scenario(basic_data)
     scenario.set_title('Circuit')
-    data = dict()
-    return render_template("strip.html", data=data, scenario=scenario, show_circuit=True)
+    scenario.add_circuit()
+    return render_template("scenario.html", scenario=scenario, show_circuit=True)
 
 
 @app1.route("/overflight")
@@ -102,14 +112,19 @@ def overflight():
     if data['strip']['comments'] == '':
         data['strip']['comments'] = f'Pass this as traffic in an advisory to {random.choice(utils.aircraft_types)} {utils.generate_identifier()}'
     data['strip']['comments'] = data['strip']['comments'].replace('\n', '<br>')
-    return render_template("strip.html", data=data, scenario=scenario, time=scenario.time)
+    return render_template("scenario.html", data=data, scenario=scenario, time=scenario.time)
 
+@app1.route("/createscenario")
+def create_scenario():
+    scenario = Scenario(basic_data)
+    scenario.set_title('Create Scenario')
+    scenario.add_aircraft()
+    scenario.add_distant_arrival()
+    scenario.add_distant_arrival()
+    scenario.add_overflight()
+    scenario.add_overflight()
+    scenario.add_circuit()
+    scenario.add_departure()
 
-@app1.route("/random")
-def random_strip():
-    option = random.choices(
-            ['arrival', 'departure', 'overflight'],
-            weights = [4, 3, 1],
-            k = 1
-        )
-    return redirect(url_for(option[0]))
+    print(scenario)
+    return render_template("createscenario.html", scenario=scenario)
