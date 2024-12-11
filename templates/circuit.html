@@ -23,6 +23,8 @@
   
 </div>
 
+<div id="config" data-direction="{{ scenario.circuit_direction }}"></div>
+
 <script>
   // for animating the circuit
   const path = document.querySelector('#circuit-path');
@@ -32,6 +34,8 @@
   let offset = 1000 * Math.random() * pathLength;  // Start at a random position
   const duration = 270000; // Duration of one complete lap in milliseconds
   const fps = 60;
+  const body = document.querySelector('#config');
+  const direction = parseInt(body.getAttribute('data-direction'), 10);
 
   function animate() {
       const progress = (offset % duration) / duration;
@@ -41,7 +45,7 @@
       airplane.setAttribute('x', point.x - 5);  // Adjust for the image width
       airplane.setAttribute('y', point.y - 5);  // Adjust for the image height
 
-      offset += 1000 / fps;
+      offset += direction * 1000 / fps;
       requestAnimationFrame(animate);
   }
 

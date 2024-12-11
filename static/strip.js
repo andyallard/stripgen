@@ -158,3 +158,15 @@ function generateRandomType() {
 
 // Initialize the grid and add click functionality
 document.addEventListener('DOMContentLoaded', initializeStrip);
+
+
+  // Function to toggle visibility
+function toggleVisibility(element) {
+    const stripIdent = element.getAttribute('data-strip-id');
+    const stripClass = `.strip-${stripIdent}`;
+    const elements = document.querySelectorAll(stripClass);
+
+    elements.forEach(el => {
+        el.classList.toggle('d-none');
+    });
+}

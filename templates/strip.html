@@ -1,18 +1,26 @@
-<div class="strip">
+<div class="strip fs-6">
   <div class="grid-container" id="grid">
       <!-- These are placeholders for specific grid areas -->
-      <div class="grid-item col1"></div> <!-- empty -->
-      <div class="grid-item col2"> {{ strip.ident }} </div>
-      <div class="grid-item col3"> {{ strip.point_of_departure.location }} </div>
-      <div class="grid-item col4"> {{ strip.altitude }} </div>
-      <div class="grid-item col5"></div>
-      <div class="grid-item col2-bottom"> {{ strip.aircraft_type }} </div>
-      <div class="grid-item col3-bottom"> {{ strip.destination.location }} </div>
-      <div class="grid-item col4-bottom"> {{ strip.flight_rules }} </div>
-      <div class="grid-item col5-bottom"></div>
-      <div class="grid-item col6"> {{ strip.type }} </div>
-      <div class="grid-item col7"> {{ strip.formatted_eta() }} </div>
-      <div class="grid-item col7-bottom"> dep_time </div>  <!-- arrival/departure time -->
-      <div class="grid-item col8"> {{ strip.actual_runway }} </div>
+       
+      <div class="grid-item col1 bg-primary" data-strip-id="{{ strip.ident }}" onclick="toggleVisibility(this)"></div> <!-- button to toggle visibility of strip -->
+
+      <div class="grid-item col2 strip-{{ strip.ident }} d-none"> {{ strip.ident }} </div>
+      <div class="grid-item col3 strip-{{ strip.ident }} d-none"> {{ strip.point_of_departure.location }} </div>
+      <div class="grid-item col4 strip-{{ strip.ident }} d-none"> {{ strip.altitude }} </div>
+      <div class="grid-item col5 strip-{{ strip.ident }} d-none"></div>
+      <div class="grid-item col2-bottom strip-{{ strip.ident }} d-none"> {{ strip.aircraft_type }} </div>
+      <div class="grid-item col3-bottom strip-{{ strip.ident }} d-none"> {{ strip.destination.location }} </div>
+      <div class="grid-item col4-bottom strip-{{ strip.ident }} d-none"> {{ strip.flight_rules }} </div>
+      <div class="grid-item col5-bottom strip-{{ strip.ident }} d-none"></div>
+      <div class="grid-item fs-2 col6 strip-{{ strip.ident }} d-none"> {{ strip.type }} </div>
+      <div class="grid-item col7 strip-{{ strip.ident }} d-none"> {{ strip.formatted_time(strip.eta) }} </div>
+      <div class="grid-item col7-bottom strip-{{ strip.ident }} d-none">
+      {% if strip.departed %}
+        {{ strip.formatted_time(strip.departure_time) }}
+      {% endif %}
+      </div>
+      <div class="grid-item fs-2 col8 strip-{{ strip.ident }} d-none"> {{ strip.actual_runway }} </div>
+
+
   </div>
 </div>

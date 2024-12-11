@@ -137,13 +137,6 @@ def generate_response(data):
     return response
 
 
-def generate_departure_time(time):
-    estimating = random.randint(-2, 3)
-    departure_time = time + timedelta(minutes=estimating)
-    return departure_time.strftime("%H%M"), estimating
-
-
-
 
 def generate_strip():
     strip = dict()
@@ -268,6 +261,11 @@ def generate_distant_arrival_strip(time, locations, data):
 
 
 
+
+def generate_departure_time(time):
+    estimating = random.randint(-2, 3)
+    departure_time = time + timedelta(minutes=estimating)
+    return departure_time.strftime("%H%M"), estimating
 
 def determine_runway(value, type):
     if type == 'location':

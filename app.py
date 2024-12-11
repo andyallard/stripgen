@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for
 import random
 import utils
-from models import Scenario
+from models import Scenario, Scenario_DA_DA
 
 app1 = Flask(__name__)
 
@@ -116,15 +116,16 @@ def overflight():
 
 @app1.route("/createscenario")
 def create_scenario():
-    scenario = Scenario(basic_data)
-    scenario.set_title('Create Scenario')
-    scenario.add_aircraft()
-    scenario.add_distant_arrival()
-    scenario.add_distant_arrival()
-    scenario.add_overflight()
-    scenario.add_overflight()
-    scenario.add_circuit()
-    scenario.add_departure()
+    scenario = Scenario_DA_DA(basic_data)
+    scenario.set_title('Distant Arrival > Distant Arrival')
+    # scenario.add_aircraft()
+    # scenario.add_distant_arrival()
+    # scenario.add_overflight()
+    # scenario.add_circuit()
+    # scenario.add_departure()
+    # scenario.add_departure()
+    # scenario.add_departure()
+    # scenario.add_departure()
 
     print(scenario)
     return render_template("createscenario.html", scenario=scenario)

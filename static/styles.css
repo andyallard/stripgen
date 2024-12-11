@@ -16,30 +16,23 @@ a button {
   margin: 1px;
 }
 
+.btn-xs {
+  font-size: 0.6rem;
+  padding: 0.2rem 0.3rem;
+}
+
 #phraseology {
   white-space: normal;
   text-align: left;
 }
 
-.big {
-  font-family: Arial, Helvetica, sans-serif;  
-  font-size: 2em;
-  font-weight: bold;
-  line-height: 1.5;
-  text-align: center;
-}
-
-.hidden {
-  display: none;
-} 
-
 /* Grid container with specified columns and areas */
 .grid-container {
   display: grid;
-  grid-template-columns: 20px 160px 80px 60px 320px 60px 100px 60px;
-  grid-template-rows: 60px 60px;
+  grid-template-columns: minmax(20px, 0.4fr) 1.5fr 1.5fr 1fr 5fr 1fr 1.5fr 1fr;
+  grid-template-rows: minmax(30px, 5vh) minmax(30px, 5vh);
   gap: 2px; /* Tightened gaps */
-  max-width: 900px;
+  /* max-width: 700px; */
   background-color: #333;
   border-radius: 8px;
   overflow: hidden;
@@ -51,8 +44,6 @@ a button {
 .grid-item {
   background-color: #444;
   color: #ddd;
-  font-size: 1.5rem;
-  text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;

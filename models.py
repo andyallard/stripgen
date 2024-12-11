@@ -14,7 +14,9 @@ class Scenario:
         self.generate_random_time(time)
         self.weather = Weather()
         self.basic_data = basic_data
-        self.aircraft = dict()
+        self.aircraft = []
+        self.determine_runway()
+        self.set_circuit_direction()
 
     def __repr__(self):
         s = f'{self.title} Scenario - Weather: {self.weather}, '
@@ -40,13 +42,37 @@ class Scenario:
 
     def formatted_aircraft(self, indent=0):
         s = ''
-        for k, v in self.aircraft.items():
+        for aircraft in self.aircraft:
             s += ' ' * indent
-            s += f'{k}, {repr(v)}\n'
+            s += f'{repr(aircraft)}\n'
         return s
 
     def determine_runway(self):
-        pass
+        runways = (90, 140, 270, 320)
+        dir = self.weather.direction
+
+        # TODO: need to decide how scenario determines the runway when wind is calm
+        # if self.weather.wind_speed >= 5:
+        #     dir = self.weather.direction
+        # else:
+        #     dir = self.track
+
+        differences = [self.bearing_difference(dir, runway) for runway in runways]
+        runway = runways[differences.index(min(differences))]
+        runway = int(runway / 10)
+        self.determined_runway = f'{runway:02}'
+
+    def bearing_difference(self, bearing, runway):
+        difference = abs(runway - bearing)
+        if difference > 180:
+            difference = 360 - difference
+        return difference
+
+    def set_circuit_direction(self):
+        if self.determined_runway in ['09', '14']:
+            self.circuit_direction = 1  # right hand circuits
+        elif self.determined_runway in ['27', '32']:
+            self.circuit_direction = -1  # left hand circuits
 
     def generate_name(self, name):
         if name is None:
@@ -54,21 +80,30 @@ class Scenario:
         else:
             return name
 
-    def add_aircraft(self, name=None):
-        self.aircraft[self.generate_name(name)] = Strip(self.basic_data, self.time, self.weather)
+    def add_aircraft(self, name=None, restrictions=dict()):
+        self.aircraft.append(Strip(self.basic_data, self.time, self.weather, restrictions))
 
-    def add_distant_arrival(self, name=None):
-        self.aircraft[self.generate_name(name)] = Distant_Arrival_Strip(self.basic_data, self.time, self.weather)
+    def add_distant_arrival(self, name=None, restrictions=dict()):
+        self.aircraft.append(Distant_Arrival_Strip(self.basic_data, self.time, self.weather, restrictions))
 
-    def add_departure(self, name=None):
-        self.aircraft[self.generate_name(name)] = Departure_Strip(self.basic_data, self.time, self.weather)
+    def add_departure(self, name=None, restrictions=dict()):
+        self.aircraft.append(Departure_Strip(self.basic_data, self.time, self.weather, restrictions))
 
-    def add_circuit(self, name=None):
-        self.aircraft[self.generate_name(name)] = Circuit_Strip(self.basic_data, self.time, self.weather)
+    def add_circuit(self, name=None, restrictions=dict()):
+        self.aircraft.append(Circuit_Strip(self.basic_data, self.time, self.weather, restrictions))
 
-    def add_overflight(self, name=None):
-        self.aircraft[self.generate_name(name)] = Overflight_Strip(self.basic_data, self.time, self.weather)
+    def add_overflight(self, name=None, restrictions=dict()):
+        self.aircraft.append(Overflight_Strip(self.basic_data, self.time, self.weather, restrictions))
 
+class Scenario_DA_DA(Scenario):
+    def __init__(self, basic_data, time=None):
+        super().__init__(basic_data, time)
+
+        self.add_distant_arrival()
+        strip = self.aircraft[len(self.aircraft) - 1]  # get last item in list
+        self.restrictions = {}
+        self.restrictions['arrive 2 min from'] = strip.eta
+        self.add_distant_arrival(restrictions=self.restrictions)
 
 class Weather:
     def __init__(self, wind_speed=None, direction=None, gust=None, altimeter=None) -> None:
@@ -137,7 +172,7 @@ class Weather:
         if altimeter is not None:
             self.altimeter = altimeter
             return
-        
+
         self.altimeter = random.randint(2885, 3115)
 
     def check_calm_wind(self):
@@ -154,20 +189,21 @@ class Weather:
 
     def __str__(self):
         return f'{self.print_wind()}  {self.print_altimeter()}'
-    
+
     def print_wind(self):
         s = f'{self.direction:03}/{self.wind_speed:02}'
         if self.gust > 0:
             s += f'G{self.gust:02}'
         return s
-    
+
     def print_altimeter(self):
         return f'A{self.altimeter:04}'
-    
 
 
 class Strip:
-    def __init__(self, basic_data, time, weather):
+    def __init__(self, basic_data, scenario_time, weather, restrictions=dict()):
+        self.scenario_time = scenario_time
+        self.restrictions = restrictions
         self.generate_identifier()
         self.generate_aircraft_type(aircraft_types)
         self.flight_rules = 'V'
@@ -177,7 +213,8 @@ class Strip:
         self.determine_track()
         self.determine_runway(weather)
         self.set_actual_runway()
-        self.departure_time = None
+        self.set_departure_time()
+        self.set_departed_flag()
         self.determine_fl_direction()
         self.generate_altitude()
         self.eta = None
@@ -185,9 +222,10 @@ class Strip:
     def __repr__(self):
         s = f"{self.type} - {self.ident}: {self.aircraft_type} | "
         s += f"DR: {self.determined_runway} AR: {self.actual_runway} | "
-        s += f"{self._fl_direction} {self.point_of_departure['location']} > "
+        s += f"{self.point_of_departure['location']} > "
         s += f"{self.destination['location']}, "
-        s += f"arr: {self.formatted_eta()}, "
+        s += f"arr: {self.formatted_time(self.eta)}, "
+        s += f"dep: {self.formatted_time(self.departure_time)}, "
         s += f" alt: {self.altitude}"
         return s
     
@@ -218,8 +256,14 @@ class Strip:
     def set_point_of_departure(self, basic_data):
         self.point_of_departure = basic_data['march']
 
-    def generate_eta(self, time):
-        values = list(range(5, 20))
+    def generate_eta(self):
+        sync_to = self.restrictions.get('arrive 2 min from')
+        if sync_to:
+            delta = int((sync_to - self.scenario_time).total_seconds() / 60)
+            values = list(range(delta - 2, delta + 2))
+        else:
+            values = list(range(5, 20))
+
         weights = [(20 - i) for i in values]
 
         # Normalize weights to make them a proper probability distribution
@@ -227,13 +271,7 @@ class Strip:
 
         # Generate a random number with the specified weights
         estimating = random.choices(values, weights=weights, k=1)[0]
-        self.eta = time + timedelta(minutes=estimating)
-
-    def formatted_eta(self):
-        if self.eta is None:
-            return ''
-        else:
-            return self.eta.strftime("%H%M")
+        self.eta = self.scenario_time + timedelta(minutes=estimating)
     
     def generate_altitude(self):
         if self._fl_direction == '':
@@ -247,6 +285,15 @@ class Strip:
 
     def determine_track(self):
         self.track = 0
+
+    def set_departure_time(self):
+        self.departure_time = None
+
+    def formatted_time(self, time):
+        if time is None:
+            return ''
+        else:
+            return time.strftime("%H%M")
 
     def determine_fl_direction(self):
         self._fl_direction = ''
@@ -264,20 +311,27 @@ class Strip:
         runway = int(runway / 10)
         self.determined_runway = f'{runway:02}'
 
-    def bearing_difference(self, bearing1, runway):
-        difference = abs(runway - bearing1)
+    def bearing_difference(self, bearing, runway):
+        difference = abs(runway - bearing)
         if difference > 180:
             difference = 360 - difference
-        # print(f'difference between {bearing1} and {runway} is {difference}')
         return difference
 
     def set_actual_runway(self):
         self.actual_runway = self.determined_runway
+
+    def set_departed_flag(self):
+        if self.departure_time is None:
+            self.departed = None
+        elif self.departure_time < self.scenario_time:
+            self.departed = True
+        else:
+            self.departed = False
         
 class Distant_Arrival_Strip(Strip):
-    def __init__(self, basic_data, time, weather):
-        super().__init__(basic_data, time, weather)        
-        self.generate_eta(time)
+    def __init__(self, basic_data, time, weather, restrictions=None):
+        super().__init__(basic_data, time, weather, restrictions)        
+        self.generate_eta()
 
     def set_type(self):
         self.type = 'A'
@@ -312,14 +366,22 @@ class Departure_Strip(Strip):
         else:
             self._fl_direction = 'west'
 
+    def set_departure_time(self):
+        estimating = random.randint(-2, 3)
+        self.departure_time = self.scenario_time + timedelta(minutes=estimating)
+
 class Circuit_Strip(Strip):
 
     def set_type(self):
         self.type = 'C'
 
+    def set_departure_time(self):
+        offset = -random.randint(5, 90)
+        self.departure_time = self.scenario_time + timedelta(minutes=offset)
+
 class Overflight_Strip(Strip):
-    def __init__(self, basic_data, time, weather):
-        super().__init__(basic_data, time, weather)        
+    def __init__(self, basic_data, time, weather, restrictions=None):
+        super().__init__(basic_data, time, weather, restrictions)        
         self.generate_eta(time)
 
     def set_type(self):
