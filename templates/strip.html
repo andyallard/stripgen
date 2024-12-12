@@ -2,25 +2,24 @@
   <div class="grid-container" id="grid">
       <!-- These are placeholders for specific grid areas -->
        
-      <div class="grid-item col1 bg-primary" data-strip-id="{{ strip.ident }}" onclick="toggleVisibility(this)"></div> <!-- button to toggle visibility of strip -->
+      <div class="grid-item col1" data-strip-id="{{ aircraft.strip.ident }}" onclick="toggleVisibilityStrip(this)"></div> <!-- button to toggle visibility of strip -->
 
-      <div class="grid-item col2 strip-{{ strip.ident }} d-none"> {{ strip.ident }} </div>
-      <div class="grid-item col3 strip-{{ strip.ident }} d-none"> {{ strip.point_of_departure.location }} </div>
-      <div class="grid-item col4 strip-{{ strip.ident }} d-none"> {{ strip.altitude }} </div>
-      <div class="grid-item col5 strip-{{ strip.ident }} d-none"></div>
-      <div class="grid-item col2-bottom strip-{{ strip.ident }} d-none"> {{ strip.aircraft_type }} </div>
-      <div class="grid-item col3-bottom strip-{{ strip.ident }} d-none"> {{ strip.destination.location }} </div>
-      <div class="grid-item col4-bottom strip-{{ strip.ident }} d-none"> {{ strip.flight_rules }} </div>
-      <div class="grid-item col5-bottom strip-{{ strip.ident }} d-none"></div>
-      <div class="grid-item fs-2 col6 strip-{{ strip.ident }} d-none"> {{ strip.type }} </div>
-      <div class="grid-item col7 strip-{{ strip.ident }} d-none"> {{ strip.formatted_time(strip.eta) }} </div>
-      <div class="grid-item col7-bottom strip-{{ strip.ident }} d-none">
-      {% if strip.departed %}
-        {{ strip.formatted_time(strip.departure_time) }}
+      <div class="grid-item col2 strip-{{ aircraft.strip.ident }} d-none"> {{ aircraft.strip.ident }} </div>
+      <div class="grid-item col3 strip-{{ aircraft.strip.ident }} d-none"> {{ aircraft.strip.point_of_departure.location }} </div>
+      <div class="grid-item col4 strip-{{ aircraft.strip.ident }} d-none"> {{ aircraft.strip.altitude }} </div>
+      <div class="grid-item col5 strip-{{ aircraft.strip.ident }} d-none"></div>
+      <div class="grid-item col2-bottom strip-{{ aircraft.strip.ident }} d-none"> {{ aircraft.strip.aircraft_type }} </div>
+      <div class="grid-item col3-bottom strip-{{ aircraft.strip.ident }} d-none"> {{ aircraft.strip.destination.location }} </div>
+      <div class="grid-item col4-bottom strip-{{ aircraft.strip.ident }} d-none"> {{ aircraft.strip.flight_rules }} </div>
+      <div class="grid-item col5-bottom strip-{{ aircraft.strip.ident }} d-none"></div>
+      <div class="grid-item fs-4 col6 strip-{{ aircraft.strip.ident }} d-none"> {{ aircraft.strip.type }} </div>
+      <div class="grid-item col7 strip-{{ aircraft.strip.ident }} d-none"> {{ aircraft.strip.formatted_time(aircraft.strip.eta) }} </div>
+      <div class="grid-item col7-bottom strip-{{ aircraft.strip.ident }} d-none">
+      {% if aircraft.strip.departed %}
+        {{ aircraft.strip.formatted_time(aircraft.strip.departure_time) }}
       {% endif %}
       </div>
-      <div class="grid-item fs-2 col8 strip-{{ strip.ident }} d-none"> {{ strip.actual_runway }} </div>
-
+      <div class="grid-item fs-4 col8 strip-{{ aircraft.strip.ident }} d-none"> {{ aircraft.strip.actual_runway }} </div>
 
   </div>
 </div>

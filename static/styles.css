@@ -1,14 +1,11 @@
-
-
 body {
   display: flex;
-  font-size: larger;
   align-items: center;
   justify-content: center;
-  /* min-height: 100vh; */
-  font-family: Arial, sans-serif;
+  font-size: .75rem;
+  font-family: Lato, sans-serif;
   margin: 0;
-  background-color: #222;
+  background-color: var(--bs-dark);
   color: #ddd;
 }
 
@@ -21,7 +18,7 @@ a button {
   padding: 0.2rem 0.3rem;
 }
 
-#phraseology {
+.phraseology {
   white-space: normal;
   text-align: left;
 }
@@ -29,30 +26,36 @@ a button {
 /* Grid container with specified columns and areas */
 .grid-container {
   display: grid;
-  grid-template-columns: minmax(20px, 0.4fr) 1.5fr 1.5fr 1fr 5fr 1fr 1.5fr 1fr;
-  grid-template-rows: minmax(30px, 5vh) minmax(30px, 5vh);
-  gap: 2px; /* Tightened gaps */
-  /* max-width: 700px; */
-  background-color: #333;
-  border-radius: 8px;
+  grid-template-columns: minmax(20px, 0.4fr) 1.8fr 1.5fr 1fr 4fr 0.8fr 1.25fr 1fr;
+  grid-template-rows: minmax(30px, 3vh) minmax(30px, 3vh);
+  gap: 1px; /* Tightened gaps */
+  min-width: 50vw;
+  background-color: var(--bs-gray-900);
+  border-radius: 5px;
   overflow: hidden;
   margin-top: 2px;
-  margin-bottom: 8px;
+  margin-bottom: 2px;
 }
 
 /* Styling for grid (strip) items */
 .grid-item {
-  background-color: #444;
+  background-color: var(--bs-gray-700);
   color: #ddd;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #555; /* Border for tighter look */
+  /* border: 1px solid #555;  */
   box-sizing: border-box;
+  padding: 3px;
 }
 
 /* Custom area placements for strip */
-.col1 { grid-column: 1 / 2; grid-row: 1 / span 2; } /* Left empty */
+.col1 {
+  grid-column: 1 / 2; grid-row: 1 / span 2;
+  /* border: 1.5px solid var(--bs-info); */
+  background-color: var(--bs-gray-900);
+  background-color: var(--bs-primary);
+} /* Toggle button to hide the strip */
 .col2 { grid-column: 2 / 3; grid-row: 1; }
 .col3 { grid-column: 3 / 4; grid-row: 1; }
 .col4 { grid-column: 4 / 5; grid-row: 1; }
@@ -67,7 +70,7 @@ a button {
 .col8 { grid-column: 8 / 9; grid-row: 1 / span 2; }
 
 
-
+/* Circuit diagram styles */
 
 /* container for the circuit diagram */
 .container {
@@ -93,7 +96,8 @@ svg {
 /* Container for the road */
 .road {
     width: 75%;
-    height: 60px;
+    max-height: 60px;
+    aspect-ratio: 10 / 1;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -101,7 +105,7 @@ svg {
     z-index: -10;
 }
 
-/* Dotted line (simulating dashed line) */
+/* Dashed line */
 .dotted-line {
     position: absolute;
     top: 50%;

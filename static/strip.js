@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', initializeStrip);
 
 
   // Function to toggle visibility
-function toggleVisibility(element) {
+function toggleVisibilityStrip(element) {
     const stripIdent = element.getAttribute('data-strip-id');
     const stripClass = `.strip-${stripIdent}`;
     const elements = document.querySelectorAll(stripClass);

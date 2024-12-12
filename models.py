@@ -9,6 +9,54 @@ aircraft_types = [
     "B190", "DH8A", "DH8B", "DH8C", "DH8D", "SW4", "C130", "SF34",
     "A320", "B737", "CRJ1", "CL60", "E175", "LJ35", "B06", "R44", "H46",
 ]
+
+
+class Scenario_Aircraft:
+    def __init__(self, strip: 'Strip', instruction: str = '', phraseology: str = ''):
+        """
+        Initialize a Scenario_Aircraft instance.
+
+        :param strip: The flight strip.
+        :param instruction: An explanation of what user must do.
+        :param phraseology: The phraseology expected (answer key).
+        """
+        self.strip = strip
+        self.instruction = instruction
+        self.phraseology = phraseology
+
+    @property
+    def strip(self) -> 'Strip':
+        return self._strip
+
+    @strip.setter
+    def strip(self, value: 'Strip'):
+        if not value:
+            raise ValueError("Strip cannot be empty.")
+        self._strip = value
+
+    # Getter and Setter for 'instruction'
+    @property
+    def instruction(self) -> str:
+        return self._instruction
+
+    @instruction.setter
+    def instruction(self, value: str):
+        self._instruction = value
+
+    # Getter and Setter for 'phraseology'
+    @property
+    def phraseology(self) -> int:
+        return self._phraseology
+
+    @phraseology.setter
+    def phraseology(self, value: int):
+        self._phraseology = value
+
+    def repr(self) -> str:
+        """Return a formatted string with Scenario_Aircraft details."""
+        return f"{self.strip} {self.instruction} {self.phraseology}"
+
+
 class Scenario:
     def __init__(self, basic_data, time=None) -> None:
         self.generate_random_time(time)
@@ -44,7 +92,7 @@ class Scenario:
         s = ''
         for aircraft in self.aircraft:
             s += ' ' * indent
-            s += f'{repr(aircraft)}\n'
+            s += f'{repr(aircraft.strip)}\n'
         return s
 
     def determine_runway(self):
@@ -81,29 +129,72 @@ class Scenario:
             return name
 
     def add_aircraft(self, name=None, restrictions=dict()):
-        self.aircraft.append(Strip(self.basic_data, self.time, self.weather, restrictions))
+        self.aircraft.append(Scenario_Aircraft(Strip(self.basic_data, self.time, self.weather, restrictions)))
 
     def add_distant_arrival(self, name=None, restrictions=dict()):
-        self.aircraft.append(Distant_Arrival_Strip(self.basic_data, self.time, self.weather, restrictions))
+        self.aircraft.append(Scenario_Aircraft(Distant_Arrival_Strip(self.basic_data, self.time, self.weather, restrictions)))
 
     def add_departure(self, name=None, restrictions=dict()):
-        self.aircraft.append(Departure_Strip(self.basic_data, self.time, self.weather, restrictions))
+        self.aircraft.append(Scenario_Aircraft(Departure_Strip(self.basic_data, self.time, self.weather, restrictions)))
 
     def add_circuit(self, name=None, restrictions=dict()):
-        self.aircraft.append(Circuit_Strip(self.basic_data, self.time, self.weather, restrictions))
+        self.aircraft.append(Scenario_Aircraft(Circuit_Strip(self.basic_data, self.time, self.weather, restrictions)))
 
     def add_overflight(self, name=None, restrictions=dict()):
-        self.aircraft.append(Overflight_Strip(self.basic_data, self.time, self.weather, restrictions))
+        self.aircraft.append(Scenario_Aircraft(Overflight_Strip(self.basic_data, self.time, self.weather, restrictions)))
+
+    def generate_basic_advisory(self, aircraft_index):
+        strip = self.aircraft[aircraft_index].strip
+        s = "RUNWAY " + strip.determined_runway
+        s += f"  WIND {self.weather.print_wind()}"
+        s += f"  ALTIMETER {self.weather.altimeter}"
+        if (self.weather.altimeter <= 2899) or (self.weather.altimeter >= 3100):
+            s += f" I SAY AGAIN ALTIMETER {self.weather.altimeter}"
+        return s
+
+    def request_reporting_point(self):
+        return "REPORT OVER [suitable reporting point]"
+    
+    def convert_phraseology_to_html(self, aircraft_index):
+        self.aircraft[aircraft_index].phraseology = self.aircraft[aircraft_index].phraseology.replace('\n', '<br>')
+        print(self.aircraft[aircraft_index].phraseology)
+
+    def wrap_with_html_tag(self, text, tag, tag_class):
+        return f'<{tag} class="{tag_class}">{text}</{tag}>'
+
+    def generate_initial_advisory_script(self, aircraft_index, reporting_point_required=False, traffic=''):
+        self.aircraft[aircraft_index].phraseology += self.generate_basic_advisory(0)
+        self.aircraft[aircraft_index].phraseology += traffic
+        self.aircraft[aircraft_index].phraseology += self.wrap_with_html_tag(
+            f"\n{self.aircraft[aircraft_index].strip.ident} ROGER, WE'LL [joining procedure] for RUNWAY {self.aircraft[aircraft_index].strip.determined_runway}",
+            'span',
+            'text-secondary')
+        self.aircraft[aircraft_index].phraseology += f"\nROGER RUNWAY {self.aircraft[aircraft_index].strip.determined_runway}"
+
+        if reporting_point_required:
+            self.aircraft[aircraft_index].phraseology += f"\n{self.request_reporting_point()}"
 
 class Scenario_DA_DA(Scenario):
     def __init__(self, basic_data, time=None):
         super().__init__(basic_data, time)
 
+        # add first aircraft
         self.add_distant_arrival()
-        strip = self.aircraft[len(self.aircraft) - 1]  # get last item in list
-        self.restrictions = {}
-        self.restrictions['arrive 2 min from'] = strip.eta
+        self.aircraft[0].instruction = 'Give the initial advisory to this aircraft.'
+        self.generate_initial_advisory_script(0, reporting_point_required=True)
+        self.convert_phraseology_to_html(0)
+        
+        # ensure second aircraft arrives within 2 minutes of first
+        self.restrictions = {
+            'arrive 2 min from': self.aircraft[0].strip.eta
+        }
+
+        # add second aircraft
         self.add_distant_arrival(restrictions=self.restrictions)
+        self.aircraft[1].instruction = 'Another aircraft calls. Give them the advisory.'
+        traffic = '\nTRAFFIC'
+        self.generate_initial_advisory_script(1, reporting_point_required=True, traffic=traffic)
+        self.convert_phraseology_to_html(1)
 
 class Weather:
     def __init__(self, wind_speed=None, direction=None, gust=None, altimeter=None) -> None:
