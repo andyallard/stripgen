@@ -30,8 +30,8 @@ class Scenario_Aircraft:
 
     @strip.setter
     def strip(self, value: 'Strip'):
-        if not value:
-            raise ValueError("Strip cannot be empty.")
+        # if not value:
+        #     raise ValueError("Strip cannot be empty.")
         self._strip = value
 
     # Getter and Setter for 'instruction'
@@ -153,7 +153,7 @@ class Scenario:
         return s
 
     def request_reporting_point(self):
-        return "REPORT OVER [suitable reporting point]"
+        return "REPORT [suitable reporting point]"
     
     def convert_phraseology_to_html(self, aircraft_index):
         self.aircraft[aircraft_index].phraseology = self.aircraft[aircraft_index].phraseology.replace('\n', '<br>')
@@ -163,16 +163,39 @@ class Scenario:
         return f'<{tag} class="{tag_class}">{text}</{tag}>'
 
     def generate_initial_advisory_script(self, aircraft_index, reporting_point_required=False, traffic=''):
-        self.aircraft[aircraft_index].phraseology += self.generate_basic_advisory(0)
-        self.aircraft[aircraft_index].phraseology += traffic
-        self.aircraft[aircraft_index].phraseology += self.wrap_with_html_tag(
-            f"\n{self.aircraft[aircraft_index].strip.ident} ROGER, WE'LL [joining procedure] for RUNWAY {self.aircraft[aircraft_index].strip.determined_runway}",
+        strip = self.aircraft[aircraft_index].strip
+
+        s = self.generate_basic_advisory(0)
+        s += traffic
+        s += self.wrap_with_html_tag(
+            f"\n{strip.ident} ROGER, WE'LL [joining procedure for] RUNWAY {strip.determined_runway}",
             'span',
             'text-secondary')
-        self.aircraft[aircraft_index].phraseology += f"\nROGER RUNWAY {self.aircraft[aircraft_index].strip.determined_runway}"
+        s += f"\nROGER RUNWAY {strip.determined_runway}"
 
         if reporting_point_required:
-            self.aircraft[aircraft_index].phraseology += f"\n{self.request_reporting_point()}"
+            s += f"\n{self.request_reporting_point()}"
+        
+        self.aircraft[aircraft_index].phraseology += s
+
+    def generate_traffic_distant_arrival(self, aircraft_index, need_altitude=False):
+        strip = self.aircraft[aircraft_index].strip
+        s = '\nTRAFFIC'
+        s += f"\nINBOUND FROM THE {strip.point_of_departure['compass point']}"
+        s += f"\n{strip.aircraft_type}"
+
+        if need_altitude:
+            s += f"\nALTITUDE {strip.altitude * 100}"
+
+        s += f"\nESTIMATING IN {strip.estimating_in()} MINUTE"
+
+        if strip.estimating_in() != 1:
+            s += 'S'
+
+        s += f'\nWILL JOIN [how they will join]'
+        return s
+
+
 
 class Scenario_DA_DA(Scenario):
     def __init__(self, basic_data, time=None):
@@ -181,6 +204,7 @@ class Scenario_DA_DA(Scenario):
         # add first aircraft
         self.add_distant_arrival()
         self.aircraft[0].instruction = 'Give the initial advisory to this aircraft.'
+        self.aircraft[0].phraseology = self.aircraft[0].strip.ident + ' '
         self.generate_initial_advisory_script(0, reporting_point_required=True)
         self.convert_phraseology_to_html(0)
         
@@ -192,9 +216,19 @@ class Scenario_DA_DA(Scenario):
         # add second aircraft
         self.add_distant_arrival(restrictions=self.restrictions)
         self.aircraft[1].instruction = 'Another aircraft calls. Give them the advisory.'
-        traffic = '\nTRAFFIC'
+        self.aircraft[1].phraseology = self.aircraft[1].strip.ident + ' '
+        traffic = self.generate_traffic_distant_arrival(0)
         self.generate_initial_advisory_script(1, reporting_point_required=True, traffic=traffic)
         self.convert_phraseology_to_html(1)
+
+        # add third part of script without aircraft
+        self.add_aircraft()
+        self.aircraft[2].strip = None
+        self.aircraft[2].instruction = 'Now what do we have to do?'
+        self.aircraft[2].phraseology += self.aircraft[0].strip.ident + ' '
+        self.aircraft[2].phraseology += self.generate_traffic_distant_arrival(1)
+        self.convert_phraseology_to_html(2)
+        
 
 class Weather:
     def __init__(self, wind_speed=None, direction=None, gust=None, altimeter=None) -> None:
@@ -333,7 +367,9 @@ class Strip:
         first_letter = 'C'
         second_letter = random.choice(['F', 'G'])
         remaining_letters = ''.join(random.choices(string.ascii_uppercase, k=3))
-        self.ident = f"{first_letter}{second_letter}{remaining_letters}"
+        self.full_ident = f"{first_letter}{second_letter}{remaining_letters}"
+        self.initial_ident = f"{second_letter}{remaining_letters}"
+        self.ident = f"{remaining_letters}"
     
     def generate_aircraft_type(self, types):
         self.aircraft_type = random.choice(types)
@@ -363,6 +399,10 @@ class Strip:
         # Generate a random number with the specified weights
         estimating = random.choices(values, weights=weights, k=1)[0]
         self.eta = self.scenario_time + timedelta(minutes=estimating)
+
+    def estimating_in(self):
+        """ Returns the number of minutes between ETA and scenario time """
+        return int((self.eta - self.scenario_time).total_seconds() / 60)
     
     def generate_altitude(self):
         if self._fl_direction == '':

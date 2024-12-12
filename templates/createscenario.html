@@ -14,7 +14,13 @@
 
 {% for aircraft in scenario.aircraft %}
 
-    {% include "strip.html" %}
+    {% set index = loop.index0 %}
+
+    {% if aircraft.strip is not none %}
+        {% include "strip.html" %}
+    {% else %}
+        <hr>
+    {% endif %}
 
     <div class="d-flex justify-content-between align-items-center">
         <p fs-6>
@@ -24,7 +30,6 @@
         <!-- Button to toggle visibility -->
         <button class="btn btn-outline-primary btn-xs" onclick="toggleVisibility('strip-{{ aircraft.strip.ident }}')">Show Phraseology</button>
     </div>
-
 
     <!-- Hidden additional information -->
     <div class="container d-none" id="strip-{{ aircraft.strip.ident }}">
